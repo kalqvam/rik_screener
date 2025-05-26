@@ -4,7 +4,7 @@ import os
 import re
 
 # Configuration
-BASE_PATH = "/content/drive/MyDrive/Python/"
+BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
 
 def create_formula(formula_expr, data):
     print(f"Processing formula: {formula_expr}")
