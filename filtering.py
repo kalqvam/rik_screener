@@ -3,6 +3,9 @@ import os
 import numpy as np
 from typing import List, Dict, Optional
 
+# Configuration
+BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
+
 def filter_and_rank(
     input_file: str = "companies_with_ratios.csv",
     output_file: str = "ranked_companies.csv",
