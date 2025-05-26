@@ -4,6 +4,9 @@ from google.colab import files
 import ipywidgets as widgets
 from IPython.display import display
 
+# Configuration
+BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
+
 def replace_industry_codes(company_data_file, emtak_file, industry_code_column):
     try:
         company_df = pd.read_csv(company_data_file, encoding='utf-8')
