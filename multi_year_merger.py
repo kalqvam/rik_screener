@@ -4,6 +4,8 @@ from typing import List, Dict, Optional
 
 BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
 
+from data_preparation import filter_companies
+
 def merge_multiple_years(
     years: List[int],
     legal_forms: List[str] = ["AS", "OÜ"],
