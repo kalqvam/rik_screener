@@ -17,7 +17,7 @@ from .filtering import filter_and_rank
 from .emtak_assignment import replace_industry_codes, run_tool
 
 __version__ = "1.0.0"
-__author__ = "RIK Screener Team"
+__author__ = "kalqvam"
 
 __all__ = [
     'filter_companies',
