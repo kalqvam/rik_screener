@@ -1,8 +1,13 @@
 import pandas as pd
 import io
-from google.colab import files
-import ipywidgets as widgets
-from IPython.display import display
+try:
+    from google.colab import files
+    import ipywidgets as widgets
+    from IPython.display import display
+    COLAB_AVAILABLE = True
+except ImportError:
+    COLAB_AVAILABLE = False
+    print("Google Colab widgets not available - running in different environment")
 
 # Configuration
 BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
