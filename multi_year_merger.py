@@ -6,7 +6,7 @@ BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
 
 print("DEBUG: About to import filter_companies...")
 try:
-    from .data_preparation import filter_companies
+    from data_preparation import filter_companies
     print("DEBUG: filter_companies imported successfully in multi_year_merger.py")
 except Exception as e:
     print(f"DEBUG: Failed to import filter_companies in multi_year_merger.py: {e}")
