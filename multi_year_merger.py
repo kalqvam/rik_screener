@@ -2,7 +2,7 @@ import pandas as pd
 import os
 from typing import List, Dict, Optional
 
-BASE_PATH = "/content/drive/MyDrive/Python/"
+BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
 
 def merge_multiple_years(
     years: List[int],
