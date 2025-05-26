@@ -6,7 +6,7 @@ import re
 import json
 from datetime import datetime
 
-BASE_PATH = "/content/drive/MyDrive/Python/"
+BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 try:
