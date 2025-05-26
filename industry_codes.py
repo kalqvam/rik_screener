@@ -4,7 +4,7 @@ import numpy as np
 from typing import List, Dict, Optional
 
 # Configuration
-BASE_PATH = "/content/drive/MyDrive/Python/"
+BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
 
 def add_industry_classifications(
     input_file: str = "companies_with_ratios.csv",
