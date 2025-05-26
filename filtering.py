@@ -1,3 +1,8 @@
+import pandas as pd
+import os
+import numpy as np
+from typing import List, Dict, Optional
+
 def filter_and_rank(
     input_file: str = "companies_with_ratios.csv",
     output_file: str = "ranked_companies.csv",
