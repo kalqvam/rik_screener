@@ -1,3 +1,12 @@
+import pandas as pd
+import os
+import numpy as np
+import json
+from typing import List, Dict, Optional
+
+# Configuration
+BASE_PATH = "/content/drive/MyDrive/Python/"
+
 def add_ownership_data(
     input_file: str = "companies_with_industry.csv",
     output_file: str = "companies_with_ownership.csv",
