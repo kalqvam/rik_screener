@@ -4,7 +4,7 @@ import numpy as np
 import re
 from typing import List, Dict, Optional
 
-BASE_PATH = "/content/drive/MyDrive/Python/prudentia"
+BASE_PATH = "/content/drive/MyDrive/Python/"
 
 def filter_companies(
     year: int = 2023,
