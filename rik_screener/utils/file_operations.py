@@ -51,6 +51,8 @@ def safe_read_csv(
         read_kwargs = {
             'encoding': encoding,
             'sep': separator,
+            'quoting': 1,
+            'quotechar': '"',
             **kwargs
         }
         
