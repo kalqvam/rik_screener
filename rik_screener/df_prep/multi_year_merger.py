@@ -16,7 +16,7 @@ def merge_multiple_years(
 ) -> pd.DataFrame:
 
     if filter_companies_func is None:
-        from .data_preparation import filter_companies
+        from .general_filter import filter_companies
         filter_companies_func = filter_companies
         
     if not years:
