@@ -67,7 +67,7 @@ class ConfigManager:
             return True
         except ImportError:
             print("Running outside of Google Colab")
-            return True  # Not an error when outside Colab
+            return True
         except Exception as e:
             print(f"Failed to mount Google Drive: {e}")
             return False
