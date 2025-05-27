@@ -46,7 +46,7 @@ merged_df = merge_multiple_years(
 
 if merged_df is None or merged_df.empty:
     log_error("No multi-year data available. Exiting")
-    exit()
+    sys.exit()
 
 log_step("CALCULATING FINANCIAL RATIOS")
 ratios_file = f"companies_with_ratios_{years[-1]}_{years[0]}_{timestamp}.csv"
@@ -71,7 +71,7 @@ ratios_df = calculate_ratios(
 
 if ratios_df is None or ratios_df.empty:
     log_error("Failed to calculate ratios. Exiting")
-    exit()
+    sys.exit()
 
 log_info(f"Columns in ratios dataframe: {ratios_df.columns.tolist()}")
 
@@ -164,7 +164,7 @@ ranked_df = filter_and_rank(
 
 if ranked_df is None or ranked_df.empty:
     log_error("Failed to rank companies. Exiting")
-    exit()
+    sys.exit()
 
 log_info("Top 10 companies after all filtering and ranking:")
 log_info(str(ranked_df.head(10)))
