@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import List
+from typing import List, Dict, Set
 
 from ..utils import (
     get_config,
@@ -43,73 +43,81 @@ def add_industry_classifications(
     log_info(f"Loading industry revenue data from {revenues_file}")
     log_info(f"Available columns in revenues file: {revenues_header.columns.tolist()}")
 
+    all_report_ids = set()
+    year_report_id_mapping = {}
+    
     for year in years:
         report_id_col = f"report_id_{year}"
+        if report_id_col in companies_df.columns:
+            year_report_ids = set(companies_df[report_id_col].dropna().astype(int))
+            year_report_id_mapping[year] = year_report_ids
+            all_report_ids.update(year_report_ids)
+            log_info(f"Year {year}: {len(year_report_ids)} report IDs")
 
-        if report_id_col not in companies_df.columns:
-            log_warning(f"{report_id_col} not found in companies data. Skipping year {year}")
-            continue
+    if not all_report_ids:
+        log_warning("No report IDs found for any year")
+        return companies_df
 
-        log_info(f"Processing industry classifications for year {year}")
+    log_info(f"Total unique report IDs across all years: {len(all_report_ids)}")
 
-        report_ids = companies_df[report_id_col].dropna().astype(int).tolist()
-        log_info(f"Found {len(report_ids)} report IDs to process for year {year}")
-
-        if not report_ids:
-            continue
-
-        chunks = []
+    try:
+        log_info("Reading revenues file once for all years...")
+        
         chunk_size = config.get_default('chunk_size', 500000)
+        all_industry_data = []
+        
+        for chunk in safe_read_csv(
+            revenues_file,
+            chunk_size=chunk_size,
+            dtype={"report_id": int, "emtak": str}
+        ):
+            filtered_chunk = chunk[
+                (chunk["report_id"].isin(all_report_ids)) &
+                (chunk["põhitegevusala"] == "jah")
+            ]
+            
+            if not filtered_chunk.empty:
+                filtered_chunk = filtered_chunk[["report_id", "emtak"]].copy()
+                all_industry_data.append(filtered_chunk)
 
-        try:
-            for chunk in safe_read_csv(
-                revenues_file,
-                chunk_size=chunk_size,
-                dtype={"report_id": int, "emtak": str}
-            ):
-                filtered_chunk = chunk[
-                    (chunk["report_id"].isin(report_ids)) &
-                    (chunk["põhitegevusala"] == "jah")
-                ]
+        if not all_industry_data:
+            log_warning("No industry data found for any companies")
+            return companies_df
 
-                if not filtered_chunk.empty:
-                    chunks.append(filtered_chunk)
+        industry_data = pd.concat(all_industry_data, ignore_index=True)
+        log_info(f"Found {len(industry_data)} total industry records")
 
-            if not chunks:
-                log_warning(f"No industry data found for year {year}")
+        duplicates = industry_data["report_id"].duplicated()
+        if duplicates.any():
+            dupe_count = duplicates.sum()
+            log_warning(f"Found {dupe_count} duplicate main industry codes. Using the first occurrence")
+            industry_data = industry_data.drop_duplicates(subset="report_id", keep="first")
+
+        industry_dict = dict(zip(industry_data["report_id"], industry_data["emtak"]))
+        log_info(f"Created industry lookup dictionary with {len(industry_dict)} entries")
+
+        for year in years:
+            if year not in year_report_id_mapping:
+                log_warning(f"No report IDs found for year {year}, skipping")
                 continue
 
-            industry_data = pd.concat(chunks, ignore_index=True)
-            industry_data = industry_data[["report_id", "emtak"]]
+            report_id_col = f"report_id_{year}"
+            industry_col = f"industry_code_{year}"
+            
+            log_info(f"Assigning industry codes for year {year}")
+            
+            companies_df[industry_col] = companies_df[report_id_col].map(industry_dict)
+            
+            assigned_count = companies_df[industry_col].notna().sum()
+            total_count = companies_df[report_id_col].notna().sum()
+            
+            log_info(f"Year {year}: assigned industry codes to {assigned_count} out of {total_count} companies")
 
-            log_info(f"Found {len(industry_data)} industry classifications for year {year}")
-
-            duplicates = industry_data["report_id"].duplicated()
-            if duplicates.any():
-                dupe_count = duplicates.sum()
-                log_warning(f"Found {dupe_count} duplicate main industry codes. Using the first occurrence")
-                industry_data = industry_data.drop_duplicates(subset="report_id", keep="first")
-
-            industry_data = industry_data.rename(columns={"emtak": f"industry_code_{year}"})
-
-            companies_df = pd.merge(
-                companies_df,
-                industry_data,
-                left_on=report_id_col,
-                right_on="report_id",
-                how="left"
-            )
-
-            if "report_id" in companies_df.columns:
-                companies_df = companies_df.drop(columns=["report_id"])
-
-            assigned_count = companies_df[f"industry_code_{year}"].notna().sum()
-            log_info(f"Assigned industry codes to {assigned_count} out of {len(companies_df)} companies for year {year}")
-
-        except Exception as e:
-            log_error(f"Error processing industry data for year {year}: {str(e)}")
-            import traceback
-            traceback.print_exc()
+    except Exception as e:
+        log_error(f"Error processing industry data: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return companies_df
 
     if safe_write_csv(companies_df, output_file):
         log_info(f"Saved {len(companies_df)} companies with industry codes to {output_file}")
@@ -120,8 +128,8 @@ def add_industry_classifications(
         industry_col = f"industry_code_{year}"
         if industry_col in companies_df.columns:
             unique_codes = companies_df[industry_col].dropna().unique()
-            log_info(f"Found {len(unique_codes)} unique industry codes for {year}")
-            log_info(f"Sample of industry codes: {unique_codes[:10]}")
-            break
+            log_info(f"Year {year}: {len(unique_codes)} unique industry codes")
+            if len(unique_codes) > 0:
+                log_info(f"Year {year} sample codes: {unique_codes[:10]}")
 
     return companies_df
