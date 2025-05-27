@@ -62,8 +62,14 @@ def safe_read_csv(
         
         df = pd.read_csv(file_path, **read_kwargs)
         
+        if len(df.columns) == 1 and ',' in df.columns[0]:
+            log_warning(f"Detected wrong separator, retrying with comma separator")
+            read_kwargs['sep'] = ','
+            df = pd.read_csv(file_path, **read_kwargs)
+        
         if chunk_size is None:
             log_info(f"Successfully read {len(df)} rows from {filename}")
+            log_info(f"Columns detected: {df.columns.tolist()}")
         
         return df
         
@@ -77,17 +83,22 @@ def safe_write_csv(
     filename: str,
     base_path: Optional[str] = None,
     encoding: Optional[str] = None,
+    separator: Optional[str] = None,
     **kwargs
 ) -> bool:
     file_path = get_file_path(filename, base_path)
     config = get_config()
-
+    
     if encoding is None:
         encoding = config.get_default('encoding', 'utf-8-sig')
+    
+    if separator is None:
+        separator = ','
     
     write_kwargs = {
         'index': False,
         'encoding': encoding,
+        'sep': separator,
         'decimal': config.get_default('decimal_separator', '.'),
         **kwargs
     }
