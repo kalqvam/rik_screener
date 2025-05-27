@@ -68,25 +68,3 @@ def filter_companies(
 
     print(f"Saved {len(filtered_companies)} filtered companies to {output_path}")
     return filtered_companies
-
-"""
-if __name__ == "__main__":
-    # Mount Google Drive (required in Colab)
-    try:
-        from google.colab import drive
-        drive.mount('/content/drive')
-        print("Google Drive mounted successfully")
-    except ImportError:
-        print("Running outside of Google Colab")
-
-    # Example usage
-    filtered_df = filter_companies(
-        year=2022,
-        legal_forms=["AS", "OÜ"],
-        output_file="filtered_companies_2022.csv"
-    )
-
-    if filtered_df is not None:
-        print("\nFirst 5 filtered companies:")
-        print(filtered_df.head())
-"""
