@@ -64,18 +64,18 @@ def asset_turnover(year: int, binary: int = 0) -> str:
 
 def roe(year: int, binary: int = 0) -> str:
     if binary == 1:
-        return f'"Aruande aasta kasum (kahjum)_{year}" / "Omakapital_{year}"'
+        return f'"Aruandeaasta kasum (kahjum)_{year}" / "Omakapital_{year}"'
     else:
         prev_year = year - 1
-        return f'"Aruande aasta kasum (kahjum)_{year}" / (("Omakapital_{year}" + "Omakapital_{prev_year}") / 2)'
+        return f'"Aruandeaasta kasum (kahjum)_{year}" / (("Omakapital_{year}" + "Omakapital_{prev_year}") / 2)'
 
 
 def roa(year: int, binary: int = 0) -> str:
     if binary == 1:
-        return f'"Aruande aasta kasum (kahjum)_{year}" / "Varad_{year}"'
+        return f'"Aruandeaasta kasum (kahjum)_{year}" / "Varad_{year}"'
     else:
         prev_year = year - 1
-        return f'"Aruande aasta kasum (kahjum)_{year}" / (("Varad_{year}" + "Varad_{prev_year}") / 2)'
+        return f'"Aruandeaasta kasum (kahjum)_{year}" / (("Varad_{year}" + "Varad_{prev_year}") / 2)'
 
 
 def employee_efficiency(year: int, binary: int = 0) -> str:
