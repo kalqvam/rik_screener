@@ -48,10 +48,10 @@ test = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/kalqvam/rik-screener"
-Documentation = "https://github.com/kalqvam/rik-screener#readme"
-Repository = "https://github.com/kalqvam/rik-screener.git"
-Issues = "https://github.com/kalqvam/rik-screener/issues"
+Homepage = "https://github.com/kalqvam/rik_screener_tool"
+Documentation = "https://github.com/kalqvam/rik_screener_tool#readme"
+Repository = "https://github.com/kalqvam/rik_screener_tool.git"
+Issues = "https://github.com/kalqvam/rik_screener_tool/issues"
 
 [project.scripts]
 rik-screener = "rik_screener.call:main"
@@ -151,6 +151,6 @@ exclude_lines = [
     "raise NotImplementedError",
     "if 0:",
     "if __name__ == .__main__.:",
-    "class .*\bProtocol\):",
-    "@(abc\.)?abstractmethod",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
 ]
