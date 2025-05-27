@@ -4,7 +4,6 @@ import re
 from typing import List, Dict, Any, Optional, Union, Tuple
 from .logging import log_info, log_warning, log_error
 
-
 def convert_to_numeric(
     df: pd.DataFrame,
     columns: Union[str, List[str]],
@@ -28,8 +27,7 @@ def convert_to_numeric(
         
         nan_count = df_copy[col].isna().sum()
         converted_count = df_copy[col].notna().sum()
-        
-        # Fill NaN values if requested
+
         if fill_value is not None:
             df_copy[col] = df_copy[col].fillna(fill_value)
             if log_conversions and nan_count > 0:
@@ -42,7 +40,6 @@ def convert_to_numeric(
                 log_warning(f"Column '{col}': {failed_count} values could not be converted")
     
     return df_copy
-
 
 def validate_columns(
     df: pd.DataFrame,
@@ -61,7 +58,6 @@ def validate_columns(
     
     return all_present, missing_columns
 
-
 def clean_column_names(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
     if not inplace:
         df = df.copy()
@@ -78,7 +74,6 @@ def clean_column_names(df: pd.DataFrame, inplace: bool = False) -> pd.DataFrame:
         log_info(f"Cleaned {len(cleaned_columns)} column names")
     
     return df
-
 
 def handle_nan_values(
     df: pd.DataFrame,
@@ -116,17 +111,7 @@ def handle_nan_values(
     
     return df_copy
 
-
 def extract_quoted_columns(formula: str) -> List[str]:
-    """
-    Extract column names from a formula string that are wrapped in quotes.
-    
-    Args:
-        formula: Formula string containing quoted column names
-        
-    Returns:
-        List of column names found in the formula
-    """
     if not formula:
         return []
     
