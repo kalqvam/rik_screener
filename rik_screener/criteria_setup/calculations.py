@@ -75,20 +75,6 @@ def calculate_ratios(
     financial_items: list = None,
     formulas: dict = None  # Dictionary of {formula_name: formula_expression}
 ) -> pd.DataFrame:
-    """
-    Load financial data for merged companies and calculate financial ratios.
-    Updated to handle consolidated reports properly at the financial data level.
-
-    Args:
-        input_file: CSV file with merged companies from step 1.5
-        output_file: Output file name for companies with calculated ratios
-        years: List of years to process
-        financial_items: List of financial items to retrieve
-        formulas: Dictionary of {formula_name: formula_expression} to calculate
-
-    Returns:
-        DataFrame with companies and calculated ratios
-    """
     # Set default years if none provided
     if years is None:
         years = [2023, 2022, 2021]  # Default years
@@ -272,40 +258,3 @@ def calculate_ratios(
 
     print(f"Saved {len(result)} companies with ratios to {output_path}")
     return result
-
-"""
-if __name__ == "__main__":
-    # Mount Google Drive (required in Colab)
-    try:
-        from google.colab import drive
-        drive.mount('/content/drive')
-        print("Google Drive mounted successfully")
-    except ImportError:
-        print("Running outside of Google Colab")
-
-    # Example usage for multi-year analysis
-    years = [2023, 2022, 2021]
-
-    ratios_df = calculate_ratios(
-        input_file="merged_companies_multi_year.csv",
-        output_file="companies_with_ratios_multiyear.csv",
-        years=years,
-        formulas={
-            f"EBITDA_Margin_{years[0]}": f'("Ärikasum (kahjum)_{years[0]}" + "Põhivarade kulum ja väärtuse langus_{years[0]}") / "Müügitulu_{years[0]}"',
-            f"EBITDA_Margin_{years[1]}": f'("Ärikasum (kahjum)_{years[1]}" + "Põhivarade kulum ja väärtuse langus_{years[1]}") / "Müügitulu_{years[1]}"',
-            "Revenue_Growth": f'("Müügitulu_{years[0]}" - "Müügitulu_{years[1]}") / "Müügitulu_{years[1]}"',
-            "3Yr_Revenue_CAGR": f'pow(("Müügitulu_2023" / "Müügitulu_2021"), 1/2) - 1'
-        },
-        financial_items=[
-            "Müügitulu",
-            "Ärikasum (kahjum)",
-            "Puhaskasum (-kahjum)",
-            "Põhivarade kulum ja väärtuse langus"
-        ]
-    )
-
-    if ratios_df is not None:
-        print("\nSample of calculated multi-year ratios:")
-        ratio_cols = [f"EBITDA_Margin_{years[0]}", "Revenue_Growth", "3Yr_Revenue_CAGR"]
-        print(ratios_df[["company_code"] + ratio_cols].head())
-"""
