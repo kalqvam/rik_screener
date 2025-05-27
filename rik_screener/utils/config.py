@@ -17,7 +17,6 @@ class ConfigManager:
         return "/content/drive/MyDrive/Python/rik_screener"
     
     def _load_defaults(self) -> Dict[str, Any]:
-        """Load default configuration values."""
         return {
             'years': [2023, 2022, 2021],
             'legal_forms': ["AS", "OÜ"],
