@@ -59,7 +59,7 @@ rik-screener = "rik_screener.call:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["rik_screener*"]
-exclude = ["tests*"]
+exclude = ["tests*", "*.tests", "*.tests.*", "tests.*"]
 
 [tool.setuptools.package-data]
 rik_screener = ["*.json", "*.csv"]
