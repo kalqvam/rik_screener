@@ -11,7 +11,8 @@ BASE_PATH = os.getenv('RIK_SCREENER_PATH', DEFAULT_BASE_PATH)
 
 from .df_prep.general_filter import filter_companies
 from .df_prep.multi_year_merger import merge_multiple_years
-from .criteria_setup.calculations import calculate_ratios, create_formula, extract_quoted_columns
+from .criteria_setup.calculations import calculate_ratios, create_formula
+from .utils.data_processing import extract_quoted_columns
 from .add_info.industry_codes import add_industry_classifications
 from .add_info.shareholder_data import add_ownership_data
 from .post_processing.filtering import filter_and_rank
@@ -70,7 +71,6 @@ def get_timestamp():
     return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 def validate_base_path():
-    """Validate that the base path exists and is accessible."""
     if not os.path.exists(BASE_PATH):
         print(f"Warning: Base path {BASE_PATH} does not exist")
         return False
