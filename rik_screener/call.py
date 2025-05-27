@@ -15,12 +15,12 @@ from datetime import datetime
 BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
 TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-from data_preparation import filter_companies
-from multi_year_merger import merge_multiple_years
-from calculations import calculate_ratios
-from industry_codes import add_industry_classifications
-from shareholder_data import add_ownership_data
-from filtering import filter_and_rank
+from .df_prep.general_filter import filter_companies
+from .df_prep.multi_year_merger import merge_multiple_years
+from .criteria_setup.calculations import calculate_ratios
+from .add_info.industry_codes import add_industry_classifications
+from .add_info.shareholder_data import add_ownership_data
+from .post_processing.filtering import filter_and_rank
 
 try:
     from google.colab import drive
