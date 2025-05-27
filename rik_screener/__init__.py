@@ -38,7 +38,6 @@ __all__ = [
 from . import call
 
 def set_base_path(path: str):
-    """Set the base path for data files."""
     global BASE_PATH
     BASE_PATH = path
 
@@ -57,7 +56,6 @@ def set_base_path(path: str):
     filtering.BASE_PATH = path
 
 def setup_environment():
-    """Setup the environment (mount Google Drive if in Colab)."""
     try:
         from google.colab import drive
         drive.mount('/content/drive')
