@@ -6,15 +6,17 @@ import re
 from typing import List, Dict, Optional
 from datetime import datetime
 
-BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
+# Make BASE_PATH configurable instead of hard-coded
+DEFAULT_BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
+BASE_PATH = os.getenv('RIK_SCREENER_PATH', DEFAULT_BASE_PATH)
 
+# Use relative imports to avoid circular import issues
 from .data_preparation import filter_companies
 from .multi_year_merger import merge_multiple_years
 from .calculations import calculate_ratios, create_formula, extract_quoted_columns
 from .industry_codes import add_industry_classifications
 from .shareholder_data import add_ownership_data
 from .filtering import filter_and_rank
-#from .emtak_assignment import replace_industry_codes, run_tool
 
 __version__ = "1.0.0"
 __author__ = "kalqvam"
@@ -26,14 +28,36 @@ __all__ = [
     'create_formula',
     'extract_quoted_columns',
     'add_industry_classifications',
-    'replace_industry_codes',
-    'run_tool',
     'add_ownership_data',
     'filter_and_rank',
-    'BASE_PATH'
+    'BASE_PATH',
+    'setup_environment',
+    'get_timestamp',
+    'validate_base_path',
+    'set_base_path'
 ]
 
+def set_base_path(path: str):
+    """Set the base path for data files."""
+    global BASE_PATH
+    BASE_PATH = path
+    # Update BASE_PATH in all modules
+    from . import data_preparation
+    from . import multi_year_merger
+    from . import calculations
+    from . import industry_codes
+    from . import shareholder_data
+    from . import filtering
+    
+    data_preparation.BASE_PATH = path
+    multi_year_merger.BASE_PATH = path
+    calculations.BASE_PATH = path
+    industry_codes.BASE_PATH = path
+    shareholder_data.BASE_PATH = path
+    filtering.BASE_PATH = path
+
 def setup_environment():
+    """Setup the environment (mount Google Drive if in Colab)."""
     try:
         from google.colab import drive
         drive.mount('/content/drive')
@@ -56,3 +80,4 @@ def validate_base_path():
 
 print(f"RIK Screener v{__version__} initialized")
 print(f"Base path: {BASE_PATH}")
+print("Use set_base_path() to change the data directory if needed")
