@@ -42,19 +42,18 @@ def safe_read_csv(
     if encoding is None:
         encoding = config.get_default('encoding', 'utf-8')
     
-    if separator is None:
-        separator = config.get_default('csv_separator', ';')
-    
     try:
         log_info(f"Reading CSV file: {filename}")
         
         read_kwargs = {
             'encoding': encoding,
-            'sep': separator,
-            'quoting': 1,
-            'quotechar': '"',
             **kwargs
         }
+        
+        if separator is not None:
+            read_kwargs['sep'] = separator
+        elif filename.endswith('general_data.csv') or filename.endswith('revenues.csv'):
+            read_kwargs['sep'] = ';'
         
         if chunk_size is not None:
             read_kwargs['chunksize'] = chunk_size
@@ -63,11 +62,6 @@ def safe_read_csv(
             read_kwargs['usecols'] = usecols
         
         df = pd.read_csv(file_path, **read_kwargs)
-        
-        if len(df.columns) == 1 and ',' in df.columns[0]:
-            log_warning(f"Detected wrong separator, retrying with comma separator")
-            read_kwargs['sep'] = ','
-            df = pd.read_csv(file_path, **read_kwargs)
         
         if chunk_size is None:
             log_info(f"Successfully read {len(df)} rows from {filename}")
@@ -85,23 +79,17 @@ def safe_write_csv(
     filename: str,
     base_path: Optional[str] = None,
     encoding: Optional[str] = None,
-    separator: Optional[str] = None,
     **kwargs
 ) -> bool:
     file_path = get_file_path(filename, base_path)
     config = get_config()
     
     if encoding is None:
-        encoding = config.get_default('encoding', 'utf-8-sig')
-    
-    if separator is None:
-        separator = ','
+        encoding = config.get_default('encoding', 'utf-8')
     
     write_kwargs = {
         'index': False,
         'encoding': encoding,
-        'sep': separator,
-        'decimal': config.get_default('decimal_separator', '.'),
         **kwargs
     }
     
