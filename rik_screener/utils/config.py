@@ -29,13 +29,13 @@ class ConfigManager:
                 "Ärikasum (kahjum)",
                 "Omakapital",
                 "Põhivarade kulum ja väärtuse langus",
-                "Aruande aasta kasum",
+                "Aruande aasta kasum (kahjum)",
                 "Varad",
-                "Töötajate arv taandatud täistööajale",
+                "Töötajate keskmine arv taandatud täistööajale",
                 "Raha",
-                "Lühiajalised Kohustised",
-                "Pikaajalised Kohustised",
-                "Käibevara kokku",
+                "Lühiajalised kohustised",
+                "Pikaajalised kohustised",
+                "Käibevarad",
                 "Tööjõukulud"
             ]
         }
