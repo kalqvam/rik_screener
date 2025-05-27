@@ -6,17 +6,15 @@ import re
 from typing import List, Dict, Optional
 from datetime import datetime
 
-# Make BASE_PATH configurable instead of hard-coded
 DEFAULT_BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
 BASE_PATH = os.getenv('RIK_SCREENER_PATH', DEFAULT_BASE_PATH)
 
-# Use relative imports to avoid circular import issues
-from .data_preparation import filter_companies
-from .multi_year_merger import merge_multiple_years
-from .calculations import calculate_ratios, create_formula, extract_quoted_columns
-from .industry_codes import add_industry_classifications
-from .shareholder_data import add_ownership_data
-from .filtering import filter_and_rank
+from .df_prep.general_filter import filter_companies
+from .df_prep.multi_year_merger import merge_multiple_years
+from .criteria_setup.calculations import calculate_ratios, create_formula, extract_quoted_columns
+from .add_info.industry_codes import add_industry_classifications
+from .add_info.shareholder_data import add_ownership_data
+from .post_processing.filtering import filter_and_rank
 
 __version__ = "1.0.0"
 __author__ = "kalqvam"
@@ -41,15 +39,15 @@ def set_base_path(path: str):
     """Set the base path for data files."""
     global BASE_PATH
     BASE_PATH = path
-    # Update BASE_PATH in all modules
-    from . import data_preparation
-    from . import multi_year_merger
-    from . import calculations
-    from . import industry_codes
-    from . import shareholder_data
-    from . import filtering
+
+    from .df_prep import general_filter
+    from .df_prep import multi_year_merger
+    from .criteria_setup import calculations
+    from .add_info import industry_codes
+    from .add_info import shareholder_data
+    from .post_processing import filtering
     
-    data_preparation.BASE_PATH = path
+    general_filter.BASE_PATH = path
     multi_year_merger.BASE_PATH = path
     calculations.BASE_PATH = path
     industry_codes.BASE_PATH = path
