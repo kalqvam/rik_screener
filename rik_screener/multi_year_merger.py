@@ -4,15 +4,6 @@ from typing import List, Dict, Optional
 
 BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
 
-print("DEBUG: About to import filter_companies...")
-try:
-    from data_preparation import filter_companies
-    print("DEBUG: filter_companies imported successfully in multi_year_merger.py")
-except Exception as e:
-    print(f"DEBUG: Failed to import filter_companies in multi_year_merger.py: {e}")
-    import traceback
-    traceback.print_exc()
-
 print("DEBUG: multi_year_merger.py module loading complete")
 
 
@@ -20,9 +11,14 @@ def merge_multiple_years(
     years: List[int],
     legal_forms: List[str] = ["AS", "OÜ"],
     output_file: str = "merged_companies_multiyear.csv",
-    require_all_years: bool = True
+    require_all_years: bool = True,
+    filter_companies_func=None
 ) -> pd.DataFrame:
 
+    if filter_companies_func is None:
+        from .data_preparation import filter_companies
+        filter_companies_func = filter_companies
+        
     if not years:
         print("Error: No years specified")
         return None
@@ -109,29 +105,3 @@ def merge_multiple_years(
                 print(f"Could not remove temporary file {temp_file}: {e}")
 
     return merged_data
-
-"""
-if __name__ == "__main__":
-    # Mount Google Drive (required in Colab)
-    try:
-        from google.colab import drive
-        drive.mount('/content/drive')
-        print("Google Drive mounted successfully")
-    except ImportError:
-        print("Running outside of Google Colab")
-
-    # Example usage - get data for 3 consecutive years
-    merged_df = merge_multiple_years(
-        years=[2023],  # Most recent first
-        legal_forms=["AS", "OÜ"],
-        output_file="merged_companies_multi_year.csv",
-        require_all_years=True
-    )
-
-    if merged_df is not None:
-        print("\nSample of merged data:")
-        # Show a few columns from different years to demonstrate the structure
-        sample_cols = ['company_code']
-        available_cols = [col for col in sample_cols if col in merged_df.columns]
-        print(merged_df[available_cols].head())
-"""
