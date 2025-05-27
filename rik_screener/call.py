@@ -5,15 +5,16 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.append(current_dir)
 
-import glob
 import pandas as pd
 import numpy as np
-import re
-import json
-from datetime import datetime
 
-BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
-TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
+from .utils import (
+    get_config,
+    log_step,
+    log_info,
+    log_warning,
+    log_error
+)
 
 from .df_prep.general_filter import filter_companies
 from .df_prep.multi_year_merger import merge_multiple_years
@@ -25,27 +26,30 @@ from .post_processing.filtering import filter_and_rank
 try:
     from google.colab import drive
     drive.mount('/content/drive')
-    print("Google Drive mounted successfully")
+    log_info("Google Drive mounted successfully")
 except ImportError:
-    print("Running outside of Google Colab")
+    log_info("Running outside of Google Colab")
 
-print("\n=== STEP 1.5: MERGING MULTI-YEAR DATA ===")
-years = [2023, 2022, 2021]
-merged_file = f"merged_companies_{years[-1]}_{years[0]}_{TIMESTAMP}.csv"
+config = get_config()
+timestamp = config.get_timestamp()
+
+log_step("MERGING MULTI-YEAR DATA")
+years = config.get_years()
+merged_file = f"merged_companies_{years[-1]}_{years[0]}_{timestamp}.csv"
 
 merged_df = merge_multiple_years(
     years=years,
-    legal_forms=["AS", "OÜ"],
+    legal_forms=config.get_default('legal_forms'),
     output_file=merged_file,
     require_all_years=True
 )
 
 if merged_df is None or merged_df.empty:
-    print("No multi-year data available. Exiting.")
+    log_error("No multi-year data available. Exiting")
     exit()
 
-print("\n=== STEP 2: CALCULATING FINANCIAL RATIOS ===")
-ratios_file = f"companies_with_ratios_{years[-1]}_{years[0]}_{TIMESTAMP}.csv"
+log_step("CALCULATING FINANCIAL RATIOS")
+ratios_file = f"companies_with_ratios_{years[-1]}_{years[0]}_{timestamp}.csv"
 
 formulas = {
     "EBITDA_Margin_2023": '("Ärikasum (kahjum)_2023" + abs("Põhivarade kulum ja väärtuse langus_2023")) / "Müügitulu_2023"',
@@ -55,12 +59,7 @@ formulas = {
     "EBITDA_CAGR_2Yr": '(pow((("Ärikasum (kahjum)_2023" + abs("Põhivarade kulum ja väärtuse langus_2023")) / ("Ärikasum (kahjum)_2021" + abs("Põhivarade kulum ja väärtuse langus_2021"))), 1/2) - 1) * 100'
 }
 
-financial_items = [
-    "Müügitulu",
-    "Ärikasum (kahjum)",
-    "Omakapital",
-    "Põhivarade kulum ja väärtuse langus"
-]
+financial_items = config.get_default('financial_items')
 
 ratios_df = calculate_ratios(
     input_file=merged_file,
@@ -71,13 +70,13 @@ ratios_df = calculate_ratios(
 )
 
 if ratios_df is None or ratios_df.empty:
-    print("Failed to calculate ratios. Exiting.")
+    log_error("Failed to calculate ratios. Exiting")
     exit()
 
-print(f"Columns in ratios dataframe: {ratios_df.columns.tolist()}")
+log_info(f"Columns in ratios dataframe: {ratios_df.columns.tolist()}")
 
-print("\n=== STEP 2.5: ADDING INDUSTRY CLASSIFICATIONS ===")
-industry_file = f"companies_with_industry_{years[-1]}_{years[0]}_{TIMESTAMP}.csv"
+log_step("ADDING INDUSTRY CLASSIFICATIONS")
+industry_file = f"companies_with_industry_{years[-1]}_{years[0]}_{timestamp}.csv"
 
 industry_df = add_industry_classifications(
     input_file=ratios_file,
@@ -87,19 +86,18 @@ industry_df = add_industry_classifications(
 )
 
 if industry_df is None:
-    print("Failed to add industry classifications. Using ratios file for next step.")
+    log_warning("Failed to add industry classifications. Using ratios file for next step")
     industry_file = ratios_file
 else:
-    print(f"Columns in industry dataframe: {industry_df.columns.tolist()}")
+    log_info(f"Columns in industry dataframe: {industry_df.columns.tolist()}")
 
-print("\n=== STEP 2.6: ADDING OWNERSHIP DATA ===")
-ownership_file = f"companies_with_ownership_{years[-1]}_{years[0]}_{TIMESTAMP}.csv"
+log_step("ADDING OWNERSHIP DATA")
+ownership_file = f"companies_with_ownership_{years[-1]}_{years[0]}_{timestamp}.csv"
 
 ownership_filters = {
     "owner_count": {
         "min": 1
     },
-
     "percentages": {
         "exact": None
     }
@@ -115,14 +113,14 @@ ownership_df = add_ownership_data(
 )
 
 if ownership_df is None:
-    print("Failed to add ownership data. Using industry file for next step.")
+    log_warning("Failed to add ownership data. Using industry file for next step")
     current_file = industry_file
 else:
     current_file = ownership_file
-    print(f"Columns in ownership dataframe: {ownership_df.columns.tolist()}")
+    log_info(f"Columns in ownership dataframe: {ownership_df.columns.tolist()}")
 
-print("\n=== STEP 3: FILTERING AND RANKING ===")
-ranked_file = f"ranked_companies_{years[-1]}_{years[0]}_{TIMESTAMP}.csv"
+log_step("FILTERING AND RANKING")
+ranked_file = f"ranked_companies_{years[-1]}_{years[0]}_{timestamp}.csv"
 
 financial_filters = [
     {"column": "EBITDA_2023", "min": 400000, "max": None},
@@ -165,11 +163,11 @@ ranked_df = filter_and_rank(
 )
 
 if ranked_df is None or ranked_df.empty:
-    print("Failed to rank companies. Exiting.")
+    log_error("Failed to rank companies. Exiting")
     exit()
 
-print("\nTop 10 companies after all filtering and ranking:")
-print(ranked_df.head(10))
+log_info("Top 10 companies after all filtering and ranking:")
+log_info(str(ranked_df.head(10)))
 
-print(f"\nFull results saved to: {os.path.join(BASE_PATH, ranked_file)}")
-print("\nAnalysis complete!")
+log_info(f"Full results saved to: {config.get_file_path(ranked_file)}")
+log_info("Analysis complete!")
