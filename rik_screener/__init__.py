@@ -35,6 +35,8 @@ __all__ = [
     'set_base_path'
 ]
 
+from . import call
+
 def set_base_path(path: str):
     """Set the base path for data files."""
     global BASE_PATH
