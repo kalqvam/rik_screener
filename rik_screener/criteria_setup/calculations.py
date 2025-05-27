@@ -13,7 +13,6 @@ from ..utils import (
     log_error
 )
 
-
 def create_formula(formula_expr, data):
     log_info(f"Processing formula: {formula_expr}")
 
