@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "rik-screener"
 version = "1.2.0"
 authors = [
-    {name = "kalqvam", email = "your.email@example.com"},
+    {name = "kalqvam", email = ennor.finance@gmail.com"},
 ]
 description = "A Python package for screening Estonian companies using RIK data"
 readme = "README.md"
