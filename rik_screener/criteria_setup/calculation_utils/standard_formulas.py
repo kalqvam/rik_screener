@@ -64,38 +64,38 @@ def asset_turnover(year: int, binary: int = 0) -> str:
 
 def roe(year: int, binary: int = 0) -> str:
     if binary == 1:
-        return f'"Aruande aasta kasum_{year}" / "Omakapital_{year}"'
+        return f'"Aruande aasta kasum (kahjum)_{year}" / "Omakapital_{year}"'
     else:
         prev_year = year - 1
-        return f'"Aruande aasta kasum_{year}" / (("Omakapital_{year}" + "Omakapital_{prev_year}") / 2)'
+        return f'"Aruande aasta kasum (kahjum)_{year}" / (("Omakapital_{year}" + "Omakapital_{prev_year}") / 2)'
 
 
 def roa(year: int, binary: int = 0) -> str:
     if binary == 1:
-        return f'"Aruande aasta kasum_{year}" / "Varad_{year}"'
+        return f'"Aruande aasta kasum (kahjum)_{year}" / "Varad_{year}"'
     else:
         prev_year = year - 1
-        return f'"Aruande aasta kasum_{year}" / (("Varad_{year}" + "Varad_{prev_year}") / 2)'
+        return f'"Aruande aasta kasum (kahjum)_{year}" / (("Varad_{year}" + "Varad_{prev_year}") / 2)'
 
 
 def employee_efficiency(year: int, binary: int = 0) -> str:
     if binary == 1:
-        return f'"Müügitulu_{year}" / "Töötajate arv taandatud täistööajale_{year}"'
+        return f'"Müügitulu_{year}" / "Töötajate keskmine arv taandatud täistööajale_{year}"'
     else:
         prev_year = year - 1
-        return f'"Müügitulu_{year}" / (("Töötajate arv taandatud täistööajale_{year}" + "Töötajate arv taandatud täistööajale_{prev_year}") / 2)'
+        return f'"Müügitulu_{year}" / (("Töötajate keskmine arv taandatud täistööajale_{year}" + "Töötajate keskmine arv taandatud täistööajale_{prev_year}") / 2)'
 
 
 def cash_ratio(year: int) -> str:
-    return f'"Raha_{year}" / "Lühiajalised Kohustised_{year}"'
+    return f'"Raha_{year}" / "Lühiajalised kohustised_{year}"'
 
 
 def current_ratio(year: int) -> str:
-    return f'"Käibevara kokku_{year}" / "Lühiajalised Kohustised_{year}"'
+    return f'"Käibevarad_{year}" / "Lühiajalised kohustised_{year}"'
 
 
 def debt_to_equity(year: int) -> str:
-    return f'("Lühiajalised Kohustised_{year}" + "Pikaajalised Kohustised_{year}") / "Omakapital_{year}"'
+    return f'("Lühiajalised kohustised_{year}" + "Pikaajalised kohustised_{year}") / "Omakapital_{year}"'
 
 
 def labour_ratio(year: int) -> str:
