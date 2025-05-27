@@ -1,26 +1,31 @@
 import pandas as pd
-import os
-import numpy as np
-import re
-from typing import List, Dict, Optional
+from typing import List
 
-BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
+from ..utils import (
+    get_config,
+    safe_read_csv,
+    safe_write_csv,
+    log_info,
+    log_warning,
+    log_error
+)
+
 
 def filter_companies(
     year: int = 2023,
     legal_forms: list = ["AS", "OÜ"],
     output_file: str = "filtered_companies.csv"
 ) -> pd.DataFrame:
-    print(f"Reading general company data for {year}...")
+    log_info(f"Reading general company data for {year}")
 
-    header_data = pd.read_csv(
-        os.path.join(BASE_PATH, "general_data.csv"),
-        nrows=0,
-        encoding="utf-8",
-        sep=";"
-    )
+    config = get_config()
+    
+    header_data = safe_read_csv("general_data.csv", nrows=0)
+    if header_data is None:
+        log_error("Failed to read general_data.csv header")
+        return None
 
-    print(f"Available columns in general_data.csv: {header_data.columns.tolist()}")
+    log_info(f"Available columns in general_data.csv: {header_data.columns.tolist()}")
 
     column_mapping = {
         "report_id": "report_id",
@@ -33,12 +38,10 @@ def filter_companies(
     available_columns = header_data.columns.tolist()
     usecols = [col for expected, col in column_mapping.items() if col in available_columns]
 
-    general_data = pd.read_csv(
-        os.path.join(BASE_PATH, "general_data.csv"),
-        usecols=usecols,
-        encoding="utf-8",
-        sep=";"
-    )
+    general_data = safe_read_csv("general_data.csv", usecols=usecols)
+    if general_data is None:
+        log_error("Failed to read general_data.csv")
+        return None
 
     inverse_mapping = {v: k for k, v in column_mapping.items() if v in usecols}
     general_data = general_data.rename(columns=inverse_mapping)
@@ -50,10 +53,10 @@ def filter_companies(
     ]
 
     if filtered_companies.empty:
-        print("No companies match the filtering criteria")
+        log_warning("No companies match the filtering criteria")
         return None
 
-    print(f"Found {len(filtered_companies)} active companies with the specified legal forms")
+    log_info(f"Found {len(filtered_companies)} active companies with the specified legal forms")
 
     filtered_companies = filtered_companies.rename(columns={
         "aruandeaast": "year",
@@ -63,8 +66,9 @@ def filter_companies(
 
     filtered_companies = filtered_companies.drop(columns=["staatus"])
 
-    output_path = os.path.join(BASE_PATH, output_file)
-    filtered_companies.to_csv(output_path, index=False, encoding="utf-8")
+    if safe_write_csv(filtered_companies, output_file):
+        log_info(f"Saved {len(filtered_companies)} filtered companies to {output_file}")
+    else:
+        log_error(f"Failed to save filtered companies to {output_file}")
 
-    print(f"Saved {len(filtered_companies)} filtered companies to {output_path}")
     return filtered_companies
