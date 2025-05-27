@@ -1,10 +1,14 @@
 import pandas as pd
-import os
-from typing import List, Dict, Optional
+from typing import List
 
-BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
-
-print("DEBUG: multi_year_merger.py module loading complete")
+from ..utils import (
+    get_config,
+    safe_write_csv,
+    cleanup_temp_files,
+    log_info,
+    log_warning,
+    log_error
+)
 
 
 def merge_multiple_years(
@@ -20,25 +24,25 @@ def merge_multiple_years(
         filter_companies_func = filter_companies
         
     if not years:
-        print("Error: No years specified")
+        log_error("No years specified")
         return None
 
-    print(f"Processing data for years: {years}")
+    log_info(f"Processing data for years: {years}")
 
     year_dfs = {}
 
     for year in years:
-        print(f"\nProcessing year {year}...")
-        year_df = filter_companies(
+        log_info(f"Processing year {year}")
+        year_df = filter_companies_func(
             year=year,
             legal_forms=legal_forms,
             output_file=f"temp_filtered_companies_{year}.csv"
         )
 
         if year_df is None or year_df.empty:
-            print(f"Warning: No data available for year {year}")
+            log_warning(f"No data available for year {year}")
             if require_all_years:
-                print("Since require_all_years=True, cannot continue without data for all years")
+                log_error("Since require_all_years=True, cannot continue without data for all years")
                 return None
             continue
 
@@ -50,11 +54,11 @@ def merge_multiple_years(
         year_dfs[year] = year_df
 
     if len(year_dfs) < len(years) and require_all_years:
-        print(f"Not all years have data ({len(year_dfs)} out of {len(years)})")
+        log_error(f"Not all years have data ({len(year_dfs)} out of {len(years)})")
         return None
 
     if not year_dfs:
-        print("No data available for any of the specified years")
+        log_error("No data available for any of the specified years")
         return None
 
     if require_all_years and len(year_dfs) > 1:
@@ -63,10 +67,10 @@ def merge_multiple_years(
             if year in year_dfs:
                 common_companies &= set(year_dfs[year]['company_code'])
 
-        print(f"Found {len(common_companies)} companies with data for all specified years")
+        log_info(f"Found {len(common_companies)} companies with data for all specified years")
 
         if not common_companies:
-            print("No companies have data for all specified years")
+            log_error("No companies have data for all specified years")
             return None
 
         for year in years:
@@ -87,21 +91,15 @@ def merge_multiple_years(
 
             dup_cols = [col for col in merged_data.columns if f'_dup_{year}' in col]
             if dup_cols:
-                print(f"Warning: Dropping {len(dup_cols)} duplicate columns from the merge")
+                log_warning(f"Dropping {len(dup_cols)} duplicate columns from the merge")
                 merged_data = merged_data.drop(columns=dup_cols)
 
     if not merged_data.empty:
-        output_path = os.path.join(BASE_PATH, output_file)
-        merged_data.to_csv(output_path, index=False, encoding="utf-8")
-        print(f"Saved {len(merged_data)} companies with multi-year data to {output_path}")
+        if safe_write_csv(merged_data, output_file):
+            log_info(f"Saved {len(merged_data)} companies with multi-year data to {output_file}")
+        else:
+            log_error(f"Failed to save merged data to {output_file}")
 
-    for year in years:
-        temp_file = os.path.join(BASE_PATH, f"temp_filtered_companies_{year}.csv")
-        if os.path.exists(temp_file):
-            try:
-                os.remove(temp_file)
-                print(f"Removed temporary file: {temp_file}")
-            except Exception as e:
-                print(f"Could not remove temporary file {temp_file}: {e}")
+    cleanup_temp_files(pattern="temp_filtered_companies_*.csv")
 
     return merged_data
