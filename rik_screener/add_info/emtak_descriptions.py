@@ -19,8 +19,6 @@ def add_emtak_descriptions(
     years: List[int] = None,
     create_combined_columns: bool = True
 ) -> pd.DataFrame:
-    log_step("ADDING EMTAK INDUSTRY DESCRIPTIONS")
-    
     config = get_config()
     if years is None:
         years = config.get_years()
