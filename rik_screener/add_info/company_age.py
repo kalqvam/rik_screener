@@ -28,10 +28,20 @@ def add_company_age(
     log_info(f"Loaded {len(companies_df)} companies")
     
     log_info(f"Loading legal data from {legal_data_file}")
-    legal_df = safe_read_csv(legal_data_file, usecols=["ariregistri_kood", "ettevotja_esmakande_kpv"])
+    
+    # Read the full legal data file first (it uses semicolon separator)
+    legal_df = safe_read_csv(legal_data_file, separator=';')
     if legal_df is None:
         log_error(f"Failed to load legal data file {legal_data_file}")
         return companies_df
+    
+    # Then select only the columns we need
+    if 'ariregistri_kood' not in legal_df.columns or 'ettevotja_esmakande_kpv' not in legal_df.columns:
+        log_error(f"Required columns not found in {legal_data_file}")
+        log_error(f"Available columns: {legal_df.columns.tolist()}")
+        return companies_df
+    
+    legal_df = legal_df[['ariregistri_kood', 'ettevotja_esmakande_kpv']].copy()
     
     log_info(f"Loaded legal data for {len(legal_df)} companies")
     
