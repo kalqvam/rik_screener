@@ -67,7 +67,7 @@ def add_company_names(
         cols.insert(0, 'company_name')
         companies_df = companies_df[cols]
     
-    if safe_write_csv(companies_df, output_file):
+    if safe_write_csv(companies_df, output_file, encoding='utf-8-sig'):
         log_info(f"Saved {len(companies_df)} companies with names to {output_file}")
     else:
         log_error(f"Failed to save results to {output_file}")
