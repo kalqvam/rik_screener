@@ -23,6 +23,8 @@ from .criteria_setup.calculation_utils import get_standard_formulas
 from .add_info.industry_codes import add_industry_classifications
 from .add_info.shareholder_data import add_ownership_data
 from .post_processing.filtering import filter_and_rank
+from .post_processing.scoring import score_companies
+from .post_processing.scoring_config import get_default_scoring_config
 
 try:
     from google.colab import drive
@@ -151,10 +153,70 @@ if "top_3_percentages" in available_columns:
 if "top_3_owners" in available_columns:
     export_columns.append("top_3_owners")
 """
+
+log_step("SCORING COMPANIES")
+
+scoring_config = {
+    "ebitda_margin_2023": {
+        "thresholds": [
+            {"min": 0.40, "points": 3},
+            {"min": 0.20, "points": 2}, 
+            {"min": 0.10, "points": 1}
+        ],
+        "auto_sort": True
+    },
+    "asset_turnover_2023": {
+        "thresholds": [
+            {"min": 1.0, "points": 2},
+            {"min": 0.5, "points": 1}
+        ],
+        "auto_sort": True
+    },
+    "debt_to_equity_2023": {
+        "thresholds": [
+            {"max": 0.3, "points": 3},
+            {"max": 0.5, "points": 2},
+            {"max": 0.8, "points": 1}
+        ],
+        "auto_sort": True
+    },
+    "current_ratio_2023": {
+        "thresholds": [
+            {"min": 2.0, "points": 2},
+            {"min": 1.2, "points": 1}
+        ],
+        "auto_sort": True
+    },
+    "roe_2023": {
+        "thresholds": [
+            {"min": 0.25, "points": 3},
+            {"min": 0.15, "points": 2},
+            {"min": 0.10, "points": 1}
+        ],
+        "auto_sort": True
+    }
+}
+
+scored_file = f"companies_with_scores_{years[-1]}_{years[0]}_{timestamp}.csv"
+
+scored_df = score_companies(
+    input_file=current_file,
+    output_file=scored_file,
+    scoring_config=scoring_config,
+    score_column="score"
+)
+
+if scored_df is None:
+    log_warning("Failed to score companies. Using previous file for ranking")
+    current_file = current_file
+else:
+    current_file = scored_file
+    log_info(f"Companies scored successfully. Max score: {scored_df['score'].max()}")
+
 ranked_df = filter_and_rank(
     input_file=current_file,
     output_file=ranked_file,
-    sort_column=f"ebitda_margin_{years[0]}",
+    sort_column="score",
     filters=financial_filters,
     ascending=False,
     top_n=50,
