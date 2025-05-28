@@ -79,6 +79,8 @@ def calculate_ratios(
         log_warning(f"Found {len(formula_errors)} formula validation errors")
     
     result = apply_formulas(result, valid_formulas)
+
+    result = flag_investment_vehicles(result, years, valid_formulas)
     
     if safe_write_csv(result, output_file):
         log_info(f"Saved {len(result)} companies with ratios to {output_file}")
