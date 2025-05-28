@@ -26,10 +26,18 @@ def add_company_names(
     log_info(f"Loaded {len(companies_df)} companies")
     
     log_info(f"Loading legal data from {legal_data_file}")
-    legal_df = safe_read_csv(legal_data_file, usecols=["ariregistri_kood", "nimi"])
+    
+    legal_df = safe_read_csv(legal_data_file, separator=';')
     if legal_df is None:
         log_error(f"Failed to load legal data file {legal_data_file}")
         return companies_df
+    
+    if 'ariregistri_kood' not in legal_df.columns or 'nimi' not in legal_df.columns:
+        log_error(f"Required columns not found in {legal_data_file}")
+        log_error(f"Available columns: {legal_df.columns.tolist()}")
+        return companies_df
+    
+    legal_df = legal_df[['ariregistri_kood', 'nimi']].copy()
     
     log_info(f"Loaded legal data for {len(legal_df)} companies")
     
