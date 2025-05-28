@@ -17,6 +17,8 @@ from .add_info.industry_codes import add_industry_classifications
 from .add_info.shareholder_data import add_ownership_data
 from .add_info.emtak_descriptions import add_emtak_descriptions, get_industry_summary
 from .post_processing.filtering import filter_and_rank
+from .add_info.company_age import add_company_age
+from .post_processing.company_names import add_company_names
 
 __version__ = "1.0.0"
 __author__ = "kalqvam"
@@ -32,13 +34,14 @@ __all__ = [
     'add_emtak_descriptions',
     'get_industry_summary',
     'filter_and_rank',
+    'add_company_age',
+    'add_company_names',
     'BASE_PATH',
     'setup_environment',
     'get_timestamp',
     'validate_base_path',
     'set_base_path'
 ]
-
 from . import call
 
 def set_base_path(path: str):
@@ -51,7 +54,9 @@ def set_base_path(path: str):
     from .add_info import industry_codes
     from .add_info import shareholder_data
     from .add_info import emtak_descriptions
+    from .add_info import company_age
     from .post_processing import filtering
+    from .post_processing import company_names
     
     general_filter.BASE_PATH = path
     multi_year_merger.BASE_PATH = path
@@ -59,7 +64,9 @@ def set_base_path(path: str):
     industry_codes.BASE_PATH = path
     shareholder_data.BASE_PATH = path
     emtak_descriptions.BASE_PATH = path
+    company_age.BASE_PATH = path
     filtering.BASE_PATH = path
+    company_names.BASE_PATH = path
 
 def setup_environment():
     try:
