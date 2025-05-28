@@ -52,15 +52,12 @@ if merged_df is None or merged_df.empty:
 log_step("CALCULATING FINANCIAL RATIOS")
 ratios_file = f"companies_with_ratios_{years[-1]}_{years[0]}_{timestamp}.csv"
 
-# Use standardized formulas
 standard_formulas = get_standard_formulas(years)
 
-# Add custom test formula
 custom_formulas = {
-    "working_capital_2023": '"Käibevara kokku_2023" - "Lühiajalised Kohustised_2023"'
+    "working_capital_2023": '"Käibevarad_2023" - "Lühiajalised kohustised_2023"'
 }
 
-# Combine standardized and custom formulas
 formulas = {**standard_formulas, **custom_formulas}
 
 financial_items = config.get_default('financial_items')
