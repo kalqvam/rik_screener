@@ -19,7 +19,6 @@ def add_industry_classifications(
     revenues_file: str = "revenues.csv",
     years: list = None
 ) -> pd.DataFrame:
-    log_step("ADDING INDUSTRY CLASSIFICATIONS")
     log_info(f"Loading companies from {input_file}")
 
     companies_df = safe_read_csv(input_file)

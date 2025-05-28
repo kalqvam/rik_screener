@@ -24,7 +24,6 @@ def add_ownership_data(
     top_names: int = 3,
     filters: dict = None
 ) -> pd.DataFrame:
-    log_step("ADDING OWNERSHIP DATA")
     log_info(f"Loading companies from {input_file}")
 
     companies_df = safe_read_csv(input_file)

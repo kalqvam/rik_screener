@@ -90,7 +90,7 @@ def filter_and_rank(
         companies_df = companies_df[export_columns]
         log_info(f"Selected {len(export_columns)} columns for export")
 
-    if safe_write_csv(companies_df, output_file):
+    if safe_write_csv(companies_df, output_file, encoding='utf-8-sig'):
         log_info(f"Saved {len(companies_df)} ranked companies to {output_file}")
     else:
         log_error(f"Failed to save results to {output_file}")
