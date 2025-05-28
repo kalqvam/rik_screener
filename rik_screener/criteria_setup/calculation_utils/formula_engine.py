@@ -109,7 +109,7 @@ def flag_investment_vehicles(data: pd.DataFrame, years: List[int], formulas: Dic
             mask |= (result[revenue_col] == 1)
         
         if ebitda_margin_col in result.columns:
-            mask |= (result[ebitda_margin_col] > 1.0)
+            mask |= (result[ebitda_margin_col] >= 0.99)
         
         result.loc[mask, 'investment_vehicle'] = True
         
