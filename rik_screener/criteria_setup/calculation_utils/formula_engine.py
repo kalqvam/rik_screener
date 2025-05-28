@@ -100,9 +100,9 @@ def flag_investment_vehicles(data: pd.DataFrame, years: List[int], formulas: Dic
     result['investment_vehicle'] = False
     
     for year in years:
-        revenue_col = f'Müügitulu_{year}'
-        if revenue_col in result.columns:
-            mask = result[revenue_col] == 1
+        ebitda_margin_col = f'ebitda_margin_{year}'
+        if ebitda_margin_col in result.columns:
+            mask = result[ebitda_margin_col] > 1.0
             result.loc[mask, 'investment_vehicle'] = True
             
             revenue_dependent_ratios = [
