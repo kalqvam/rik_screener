@@ -46,12 +46,12 @@ def ebitda_margin(year: int) -> str:
 
 
 def revenue_growth(from_year: int, to_year: int) -> str:
-    return f'(("Müügitulu_{to_year}" / "Müügitulu_{from_year}") - 1) * 100'
+    return f'(("Müügitulu_{to_year}" / "Müügitulu_{from_year}") - 1)'
 
 
 def revenue_cagr(start_year: int, end_year: int) -> str:
     years_diff = end_year - start_year
-    return f'(pow(("Müügitulu_{end_year}" / "Müügitulu_{start_year}"), 1/{years_diff}) - 1) * 100'
+    return f'(pow(("Müügitulu_{end_year}" / "Müügitulu_{start_year}"), 1/{years_diff}) - 1)'
 
 
 def asset_turnover(year: int, binary: int = 0) -> str:
