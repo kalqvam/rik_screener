@@ -17,5 +17,6 @@ __all__ = [
     'merge_financial_data',
     'apply_formulas',
     'validate_formulas',
-    'get_standard_formulas'
+    'get_standard_formulas',
+    'flag_investment_vehicles'
 ]
