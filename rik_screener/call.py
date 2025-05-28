@@ -142,8 +142,7 @@ elif industry_df is not None:
 else:
     available_columns = ratios_df.columns.tolist()
 
-export_columns = ["company_code", f"ebitda_margin_{years[0]}", f"revenue_growth_{years[1]}_to_{years[0]}", 
-                 "working_capital_2023", f"current_ratio_{years[0]}", f"roe_{years[0]}"]
+export_columns = None
 
 if f"industry_code_{years[0]}" in available_columns:
     export_columns.append(f"industry_code_{years[0]}")
