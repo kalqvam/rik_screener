@@ -128,7 +128,8 @@ financial_filters = [
     {"column": f"revenue_growth_{years[1]}_to_{years[0]}", "min": 0, "max": None},
     {"column": "working_capital_2023", "min": None, "max": None},
     {"column": f"current_ratio_{years[0]}", "min": 1.2, "max": None},
-    {"column": f"roe_{years[0]}", "min": 0.1, "max": None}
+    {"column": f"roe_{years[0]}", "min": 0.1, "max": None},
+    {"column": "Müügitulu_2023", "min": 10000000, "max": None}
 ]
 
 available_columns = []
