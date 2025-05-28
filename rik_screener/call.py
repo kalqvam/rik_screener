@@ -143,17 +143,16 @@ else:
     available_columns = ratios_df.columns.tolist()
 
 export_columns = None
-
+"""
 if f"industry_code_{years[0]}" in available_columns:
     export_columns.append(f"industry_code_{years[0]}")
-
 if "owner_count" in available_columns:
     export_columns.append("owner_count")
 if "top_3_percentages" in available_columns:
     export_columns.append("top_3_percentages")
 if "top_3_owners" in available_columns:
     export_columns.append("top_3_owners")
-
+"""
 ranked_df = filter_and_rank(
     input_file=current_file,
     output_file=ranked_file,
