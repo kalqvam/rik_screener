@@ -9,5 +9,6 @@ __all__ = [
     'apply_formulas',
     'validate_formulas',
     'create_formula',
-    'get_standard_formulas'
+    'get_standard_formulas',
+    'flag_investment_vehicles'
 ]
