@@ -1,6 +1,6 @@
 from .data_loaders import load_financial_data
 from .data_mergers import merge_financial_data
-from .formula_engine import apply_formulas, validate_formulas, create_formula
+from .formula_engine import apply_formulas, validate_formulas, create_formula, flag_investment_vehicles
 from .standard_formulas import get_standard_formulas
 
 __all__ = [
