@@ -1,84 +1,3 @@
-import sys
-import os
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-if current_dir not in sys.path:
-    sys.path.append(current_dir)
-
-import pandas as pd
-import numpy as np
-
-from .utils import (
-    get_config,
-    log_step,
-    log_info,
-    log_warning,
-    log_error
-)
-
-from .df_prep.general_filter import filter_companies
-from .df_prep.multi_year_merger import merge_multiple_years
-from .criteria_setup.calculations import calculate_ratios
-from .criteria_setup.calculation_utils import get_standard_formulas
-from .add_info.industry_codes import add_industry_classifications
-from .add_info.emtak_descriptions import add_emtak_descriptions
-from .add_info.shareholder_data import add_ownership_data
-from .post_processing.filtering import filter_and_rank
-from .post_processing.scoring import score_companies
-from .post_processing.scoring_config import get_default_scoring_config
-
-try:
-    from google.colab import drive
-    drive.mount('/content/drive')
-    log_info("Google Drive mounted successfully")
-except ImportError:
-    log_info("Running outside of Google Colab")
-
-config = get_config()
-timestamp = config.get_timestamp()
-
-log_step("MERGING MULTI-YEAR DATA")
-years = config.get_years()
-merged_file = f"merged_companies_{years[-1]}_{years[0]}_{timestamp}.csv"
-
-merged_df = merge_multiple_years(
-    years=years,
-    legal_forms=config.get_default('legal_forms'),
-    output_file=merged_file,
-    require_all_years=True
-)
-
-if merged_df is None or merged_df.empty:
-    log_error("No multi-year data available. Exiting")
-    sys.exit()
-
-log_step("CALCULATING FINANCIAL RATIOS")
-ratios_file = f"companies_with_ratios_{years[-1]}_{years[0]}_{timestamp}.csv"
-
-standard_formulas = get_standard_formulas(years)
-
-custom_formulas = {
-    "working_capital_2023": '"Käibevarad_2023" - "Lühiajalised kohustised_2023"'
-}
-
-formulas = {**standard_formulas, **custom_formulas}
-
-financial_items = config.get_default('financial_items')
-
-ratios_df = calculate_ratios(
-    input_file=merged_file,
-    output_file=ratios_file,
-    years=years,
-    formulas=formulas,
-    financial_items=financial_items
-)
-
-if ratios_df is None or ratios_df.empty:
-    log_error("Failed to calculate ratios. Exiting")
-    sys.exit()
-
-log_info(f"Columns in ratios dataframe: {ratios_df.columns.tolist()}")
-
 log_step("ADDING INDUSTRY CLASSIFICATIONS")
 industry_file = f"companies_with_industry_{years[-1]}_{years[0]}_{timestamp}.csv"
 
@@ -96,6 +15,21 @@ else:
     current_file = industry_file
     log_info(f"Columns in industry dataframe: {industry_df.columns.tolist()}")
 
+log_step("ADDING COMPANY AGE")
+age_file = f"companies_with_age_{years[-1]}_{years[0]}_{timestamp}.csv"
+
+age_df = add_company_age(
+    input_file=current_file,
+    output_file=age_file,
+    legal_data_file="legal_data.csv"
+)
+
+if age_df is None:
+    log_warning("Failed to add company age. Using previous file for next step")
+else:
+    current_file = age_file
+    log_info(f"Added company age successfully")
+
 log_step("ADDING EMTAK DESCRIPTIONS")
 emtak_file = f"companies_with_emtak_descriptions_{years[-1]}_{years[0]}_{timestamp}.csv"
 
@@ -112,132 +46,3 @@ if emtak_df is None:
 else:
     current_file = emtak_file
     log_info(f"Added EMTAK descriptions successfully")
-
-log_step("ADDING OWNERSHIP DATA")
-ownership_file = f"companies_with_ownership_{years[-1]}_{years[0]}_{timestamp}.csv"
-
-ownership_filters = {
-    "owner_count": {
-        "min": 1
-    },
-    "percentages": {
-        "exact": None
-    }
-}
-
-ownership_df = add_ownership_data(
-    input_file=current_file,
-    output_file=ownership_file,
-    shareholders_file="shareholders.json",
-    top_percentages=3,
-    top_names=3,
-    filters=ownership_filters
-)
-
-if ownership_df is None:
-    log_warning("Failed to add ownership data. Using previous file for next step")
-else:
-    current_file = ownership_file
-    log_info(f"Columns in ownership dataframe: {ownership_df.columns.tolist()}")
-
-log_step("FILTERING AND RANKING")
-ranked_file = f"ranked_companies_{years[-1]}_{years[0]}_{timestamp}.csv"
-
-financial_filters = [
-    {"column": f"ebitda_margin_{years[0]}", "min": 0.14, "max": None},
-    {"column": f"revenue_growth_{years[1]}_to_{years[0]}", "min": 0, "max": None},
-    {"column": "working_capital_2023", "min": None, "max": None},
-    {"column": f"current_ratio_{years[0]}", "min": 1.2, "max": None},
-    {"column": f"roe_{years[0]}", "min": 0.1, "max": None},
-    {"column": "Müügitulu_2023", "min": 10000000, "max": None}
-]
-
-available_columns = []
-if ownership_df is not None:
-    available_columns = ownership_df.columns.tolist()
-elif emtak_df is not None:
-    available_columns = emtak_df.columns.tolist()
-elif industry_df is not None:
-    available_columns = industry_df.columns.tolist()
-else:
-    available_columns = ratios_df.columns.tolist()
-
-export_columns = None
-
-log_step("SCORING COMPANIES")
-
-scoring_config = {
-    "ebitda_margin_2023": {
-        "thresholds": [
-            {"min": 0.40, "points": 3},
-            {"min": 0.20, "points": 2}, 
-            {"min": 0.10, "points": 1}
-        ],
-        "auto_sort": True
-    },
-    "asset_turnover_2023": {
-        "thresholds": [
-            {"min": 1.0, "points": 2},
-            {"min": 0.5, "points": 1}
-        ],
-        "auto_sort": True
-    },
-    "debt_to_equity_2023": {
-        "thresholds": [
-            {"max": 0.3, "points": 3},
-            {"max": 0.5, "points": 2},
-            {"max": 0.8, "points": 1}
-        ],
-        "auto_sort": True
-    },
-    "current_ratio_2023": {
-        "thresholds": [
-            {"min": 2.0, "points": 2},
-            {"min": 1.2, "points": 1}
-        ],
-        "auto_sort": True
-    },
-    "roe_2023": {
-        "thresholds": [
-            {"min": 0.25, "points": 3},
-            {"min": 0.15, "points": 2},
-            {"min": 0.10, "points": 1}
-        ],
-        "auto_sort": True
-    }
-}
-
-scored_file = f"companies_with_scores_{years[-1]}_{years[0]}_{timestamp}.csv"
-
-scored_df = score_companies(
-    input_file=current_file,
-    output_file=scored_file,
-    scoring_config=scoring_config,
-    score_column="score"
-)
-
-if scored_df is None:
-    log_warning("Failed to score companies. Using previous file for ranking")
-else:
-    current_file = scored_file
-    log_info(f"Companies scored successfully. Max score: {scored_df['score'].max()}")
-
-ranked_df = filter_and_rank(
-    input_file=current_file,
-    output_file=ranked_file,
-    sort_column="score",
-    filters=financial_filters,
-    ascending=False,
-    top_n=50,
-    export_columns=export_columns
-)
-
-if ranked_df is None or ranked_df.empty:
-    log_error("Failed to rank companies. Exiting")
-    sys.exit()
-
-log_info("Top 10 companies after all filtering and ranking:")
-log_info(str(ranked_df.head(10)))
-
-log_info(f"Full results saved to: {config.get_file_path(ranked_file)}")
-log_info("Analysis complete!")
