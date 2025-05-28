@@ -46,3 +46,42 @@ if emtak_df is None:
 else:
     current_file = emtak_file
     log_info(f"Added EMTAK descriptions successfully")
+
+ranked_df = filter_and_rank(
+    input_file=current_file,
+    output_file=ranked_file,
+    sort_column="score",
+    filters=financial_filters,
+    ascending=False,
+    top_n=50,
+    export_columns=export_columns
+)
+
+if ranked_df is None or ranked_df.empty:
+    log_error("Failed to rank companies. Exiting")
+    sys.exit()
+
+log_step("ADDING COMPANY NAMES TO FINAL RESULTS")
+final_file = f"final_companies_with_names_{years[-1]}_{years[0]}_{timestamp}.csv"
+
+final_df = add_company_names(
+    input_file=ranked_file,
+    output_file=final_file,
+    legal_data_file="legal_data.csv"
+)
+
+if final_df is None:
+    log_warning("Failed to add company names. Using ranked file as final result")
+    final_output = ranked_file
+else:
+    final_output = final_file
+    log_info(f"Added company names successfully")
+
+log_info("Top 10 companies after all filtering and ranking:")
+if final_df is not None:
+    log_info(str(final_df.head(10)))
+else:
+    log_info(str(ranked_df.head(10)))
+
+log_info(f"Full results saved to: {config.get_file_path(final_output)}")
+log_info("Analysis complete!")
