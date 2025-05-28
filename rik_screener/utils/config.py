@@ -28,7 +28,15 @@ class ConfigManager:
                 "Müügitulu",
                 "Ärikasum (kahjum)",
                 "Omakapital",
-                "Põhivarade kulum ja väärtuse langus"
+                "Põhivarade kulum ja väärtuse langus",
+                "Aruandeaasta kasum (kahjum)",
+                "Varad",
+                "Töötajate keskmine arv taandatud täistööajale",
+                "Raha",
+                "Lühiajalised kohustised",
+                "Pikaajalised kohustised",
+                "Käibevarad",
+                "Tööjõukulud"
             ]
         }
     

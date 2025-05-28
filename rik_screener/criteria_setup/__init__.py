@@ -4,7 +4,8 @@ from .calculation_utils import (
     merge_financial_data,
     apply_formulas,
     validate_formulas,
-    get_standard_formulas
+    get_standard_formulas,
+    flag_investment_vehicles
 )
 
 from ..utils import extract_quoted_columns
@@ -17,5 +18,6 @@ __all__ = [
     'merge_financial_data',
     'apply_formulas',
     'validate_formulas',
-    'get_standard_formulas'
+    'get_standard_formulas',
+    'flag_investment_vehicles'
 ]

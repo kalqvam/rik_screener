@@ -19,6 +19,7 @@ from .utils import (
 from .df_prep.general_filter import filter_companies
 from .df_prep.multi_year_merger import merge_multiple_years
 from .criteria_setup.calculations import calculate_ratios
+from .criteria_setup.calculation_utils import get_standard_formulas
 from .add_info.industry_codes import add_industry_classifications
 from .add_info.shareholder_data import add_ownership_data
 from .post_processing.filtering import filter_and_rank
@@ -51,13 +52,13 @@ if merged_df is None or merged_df.empty:
 log_step("CALCULATING FINANCIAL RATIOS")
 ratios_file = f"companies_with_ratios_{years[-1]}_{years[0]}_{timestamp}.csv"
 
-formulas = {
-    "EBITDA_Margin_2023": '("Ärikasum (kahjum)_2023" + abs("Põhivarade kulum ja väärtuse langus_2023")) / "Müügitulu_2023"',
-    "EBITDA_2023": '("Ärikasum (kahjum)_2023" + abs("Põhivarade kulum ja väärtuse langus_2023"))',
-    "Revenue_g_2023": '(("Müügitulu_2023" / "Müügitulu_2022") - 1) * 100',
-    "Revenue_g_2022": '(("Müügitulu_2022" / "Müügitulu_2021") - 1) * 100',
-    "EBITDA_CAGR_2Yr": '(pow((("Ärikasum (kahjum)_2023" + abs("Põhivarade kulum ja väärtuse langus_2023")) / ("Ärikasum (kahjum)_2021" + abs("Põhivarade kulum ja väärtuse langus_2021"))), 1/2) - 1) * 100'
+standard_formulas = get_standard_formulas(years)
+
+custom_formulas = {
+    "working_capital_2023": '"Käibevarad_2023" - "Lühiajalised kohustised_2023"'
 }
+
+formulas = {**standard_formulas, **custom_formulas}
 
 financial_items = config.get_default('financial_items')
 
@@ -123,13 +124,12 @@ log_step("FILTERING AND RANKING")
 ranked_file = f"ranked_companies_{years[-1]}_{years[0]}_{timestamp}.csv"
 
 financial_filters = [
-    {"column": "EBITDA_2023", "min": 400000, "max": None},
-    {"column": "Müügitulu_2023", "min": 6000000, "max": None},
-    {"column": "EBITDA_Margin_2023", "min": 0.14, "max": None},
-    {"column": "Revenue_g_2023", "min": 0, "max": None},
-    {"column": "Revenue_g_2022", "min": 0, "max": None},
-    {"column": "EBITDA_CAGR_2Yr", "min": 0, "max": None},
-    {"column": "Omakapital_2023", "min": 5000000, "max": 10000000}
+    {"column": f"ebitda_margin_{years[0]}", "min": 0.14, "max": None},
+    {"column": f"revenue_growth_{years[1]}_to_{years[0]}", "min": 0, "max": None},
+    {"column": "working_capital_2023", "min": None, "max": None},
+    {"column": f"current_ratio_{years[0]}", "min": 1.2, "max": None},
+    {"column": f"roe_{years[0]}", "min": 0.1, "max": None},
+    {"column": "Müügitulu_2023", "min": 10000000, "max": None}
 ]
 
 available_columns = []
@@ -140,22 +140,21 @@ elif industry_df is not None:
 else:
     available_columns = ratios_df.columns.tolist()
 
-export_columns = ["company_code", "Müügitulu_2023", "EBITDA_2023", "Omakapital_2023", "EBITDA_Margin_2023", "EBITDA_CAGR_2Yr"]
-
-if "industry_code_2023" in available_columns:
-    export_columns.append("industry_code_2023")
-
+export_columns = None
+"""
+if f"industry_code_{years[0]}" in available_columns:
+    export_columns.append(f"industry_code_{years[0]}")
 if "owner_count" in available_columns:
     export_columns.append("owner_count")
 if "top_3_percentages" in available_columns:
     export_columns.append("top_3_percentages")
 if "top_3_owners" in available_columns:
     export_columns.append("top_3_owners")
-
+"""
 ranked_df = filter_and_rank(
     input_file=current_file,
     output_file=ranked_file,
-    sort_column="EBITDA_2023",
+    sort_column=f"ebitda_margin_{years[0]}",
     filters=financial_filters,
     ascending=False,
     top_n=50,
