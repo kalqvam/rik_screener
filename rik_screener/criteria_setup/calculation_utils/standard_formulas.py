@@ -99,7 +99,7 @@ def debt_to_equity(year: int) -> str:
 
 
 def labour_ratio(year: int) -> str:
-    return f'"Tööjõukulud_{year}" / "Müügitulu_{year}"'
+    return f'-("Tööjõukulud_{year}") / "Müügitulu_{year}"'
 
 
 def get_available_formulas() -> List[str]:
