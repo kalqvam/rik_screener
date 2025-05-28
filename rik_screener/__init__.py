@@ -15,6 +15,7 @@ from .criteria_setup.calculations import calculate_ratios, create_formula
 from .utils.data_processing import extract_quoted_columns
 from .add_info.industry_codes import add_industry_classifications
 from .add_info.shareholder_data import add_ownership_data
+from .add_info.emtak_descriptions import add_emtak_descriptions, get_industry_summary
 from .post_processing.filtering import filter_and_rank
 
 __version__ = "1.0.0"
@@ -28,6 +29,8 @@ __all__ = [
     'extract_quoted_columns',
     'add_industry_classifications',
     'add_ownership_data',
+    'add_emtak_descriptions',
+    'get_industry_summary',
     'filter_and_rank',
     'BASE_PATH',
     'setup_environment',
@@ -47,6 +50,7 @@ def set_base_path(path: str):
     from .criteria_setup import calculations
     from .add_info import industry_codes
     from .add_info import shareholder_data
+    from .add_info import emtak_descriptions
     from .post_processing import filtering
     
     general_filter.BASE_PATH = path
@@ -54,6 +58,7 @@ def set_base_path(path: str):
     calculations.BASE_PATH = path
     industry_codes.BASE_PATH = path
     shareholder_data.BASE_PATH = path
+    emtak_descriptions.BASE_PATH = path
     filtering.BASE_PATH = path
 
 def setup_environment():
@@ -67,7 +72,6 @@ def setup_environment():
         return False
 
 def get_timestamp():
-    """Generate a timestamp string for file naming."""
     return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 def validate_base_path():
