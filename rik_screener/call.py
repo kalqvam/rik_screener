@@ -21,6 +21,7 @@ from .df_prep.multi_year_merger import merge_multiple_years
 from .criteria_setup.calculations import calculate_ratios
 from .criteria_setup.calculation_utils import get_standard_formulas
 from .add_info.industry_codes import add_industry_classifications
+from .add_info.emtak_descriptions import add_emtak_descriptions
 from .add_info.shareholder_data import add_ownership_data
 from .post_processing.filtering import filter_and_rank
 from .post_processing.scoring import score_companies
@@ -90,9 +91,27 @@ industry_df = add_industry_classifications(
 
 if industry_df is None:
     log_warning("Failed to add industry classifications. Using ratios file for next step")
-    industry_file = ratios_file
+    current_file = ratios_file
 else:
+    current_file = industry_file
     log_info(f"Columns in industry dataframe: {industry_df.columns.tolist()}")
+
+log_step("ADDING EMTAK DESCRIPTIONS")
+emtak_file = f"companies_with_emtak_descriptions_{years[-1]}_{years[0]}_{timestamp}.csv"
+
+emtak_df = add_emtak_descriptions(
+    input_file=current_file,
+    output_file=emtak_file,
+    emtak_file="emtak_2008.csv",
+    years=years,
+    create_combined_columns=True
+)
+
+if emtak_df is None:
+    log_warning("Failed to add EMTAK descriptions. Using previous file for next step")
+else:
+    current_file = emtak_file
+    log_info(f"Added EMTAK descriptions successfully")
 
 log_step("ADDING OWNERSHIP DATA")
 ownership_file = f"companies_with_ownership_{years[-1]}_{years[0]}_{timestamp}.csv"
@@ -107,7 +126,7 @@ ownership_filters = {
 }
 
 ownership_df = add_ownership_data(
-    input_file=industry_file,
+    input_file=current_file,
     output_file=ownership_file,
     shareholders_file="shareholders.json",
     top_percentages=3,
@@ -116,8 +135,7 @@ ownership_df = add_ownership_data(
 )
 
 if ownership_df is None:
-    log_warning("Failed to add ownership data. Using industry file for next step")
-    current_file = industry_file
+    log_warning("Failed to add ownership data. Using previous file for next step")
 else:
     current_file = ownership_file
     log_info(f"Columns in ownership dataframe: {ownership_df.columns.tolist()}")
@@ -137,22 +155,14 @@ financial_filters = [
 available_columns = []
 if ownership_df is not None:
     available_columns = ownership_df.columns.tolist()
+elif emtak_df is not None:
+    available_columns = emtak_df.columns.tolist()
 elif industry_df is not None:
     available_columns = industry_df.columns.tolist()
 else:
     available_columns = ratios_df.columns.tolist()
 
 export_columns = None
-"""
-if f"industry_code_{years[0]}" in available_columns:
-    export_columns.append(f"industry_code_{years[0]}")
-if "owner_count" in available_columns:
-    export_columns.append("owner_count")
-if "top_3_percentages" in available_columns:
-    export_columns.append("top_3_percentages")
-if "top_3_owners" in available_columns:
-    export_columns.append("top_3_owners")
-"""
 
 log_step("SCORING COMPANIES")
 
@@ -208,7 +218,6 @@ scored_df = score_companies(
 
 if scored_df is None:
     log_warning("Failed to score companies. Using previous file for ranking")
-    current_file = current_file
 else:
     current_file = scored_file
     log_info(f"Companies scored successfully. Max score: {scored_df['score'].max()}")
