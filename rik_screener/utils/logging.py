@@ -18,7 +18,6 @@ class ProgressLogger:
         self.current_step = 0
     
     def reset_step_counter(self):
-        """Reset the step counter to 0"""
         self.current_step = 0
     
     def _format_message(self, level: LogLevel, message: str) -> str:
@@ -65,7 +64,6 @@ _logger_instance = None
 
 
 def get_logger() -> ProgressLogger:
-    """Get the global logger instance."""
     global _logger_instance
     if _logger_instance is None:
         _logger_instance = ProgressLogger()
