@@ -113,7 +113,7 @@ def safe_write_csv(
 
 
 def cleanup_temp_files(
-    pattern: str = "temp_*.csv",
+    pattern: str = "*temp*.csv",
     base_path: Optional[str] = None,
     max_age_hours: Optional[int] = 24
 ) -> int:
