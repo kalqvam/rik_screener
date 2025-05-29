@@ -80,7 +80,6 @@ def _calculate_financial_ratios(config: Dict[str, Any], input_file: str) -> str:
     
     current_file = input_file
     
-    # Step 1: Calculate standard formulas if any
     if standard_formulas_config:
         log_info("Calculating standard formulas...")
         standard_formulas = _get_customized_standard_formulas(standard_formulas_config, years)
@@ -91,8 +90,7 @@ def _calculate_financial_ratios(config: Dict[str, Any], input_file: str) -> str:
             years=years,
             formulas=standard_formulas,
             financial_items=financial_items,
-            use_standard_formulas=False,
-            skip_financial_merge=False
+            use_standard_formulas=False
         )
         
         if ratios_df is None or ratios_df.empty:
@@ -100,25 +98,27 @@ def _calculate_financial_ratios(config: Dict[str, Any], input_file: str) -> str:
         
         current_file = temp_file_1
     
-    # Step 2: Calculate custom formulas if any
     if custom_formulas:
         log_info("Calculating custom formulas...")
-        ratios_df = calculate_ratios(
-            input_file=current_file,
-            output_file=temp_file_2,
-            years=years,
-            formulas=custom_formulas,
-            financial_items=financial_items,
-            use_standard_formulas=False,
-            skip_financial_merge=True  # Skip financial data merge, work with existing ratios
-        )
+
+        current_df = safe_read_csv(current_file)
+        if current_df is None:
+            raise RuntimeError("Failed to load data for custom formula calculation")
         
-        if ratios_df is None or ratios_df.empty:
-            raise RuntimeError("Failed to calculate custom formulas")
+        from ..criteria_setup.calculation_utils import apply_formulas, validate_formulas
+        
+        valid_formulas, formula_errors = validate_formulas(custom_formulas, current_df)
+        if formula_errors:
+            log_warning(f"Found {len(formula_errors)} custom formula validation errors")
+        
+        current_df = apply_formulas(current_df, valid_formulas)
+        
+        from ..utils import safe_write_csv
+        if not safe_write_csv(current_df, temp_file_2):
+            raise RuntimeError("Failed to save custom formula results")
         
         current_file = temp_file_2
     
-    # If neither standard nor custom formulas, we still need the financial data merged
     if not standard_formulas_config and not custom_formulas:
         log_info("No formulas specified, merging financial data only...")
         ratios_df = calculate_ratios(
@@ -127,8 +127,7 @@ def _calculate_financial_ratios(config: Dict[str, Any], input_file: str) -> str:
             years=years,
             formulas={},
             financial_items=financial_items,
-            use_standard_formulas=False,
-            skip_financial_merge=False
+            use_standard_formulas=False
         )
         
         if ratios_df is None or ratios_df.empty:
