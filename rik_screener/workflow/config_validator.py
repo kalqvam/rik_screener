@@ -117,8 +117,13 @@ def _get_generated_formula_names(standard_formulas, years):
             if start_year and end_year:
                 names.add(f"revenue_cagr_{start_year}_to_{end_year}")
         else:
+            use_averages = config_val.get('use_averages', True)
             for year in config_val.get('years', []):
-                names.add(f"{formula_type}_{year}")
+                if formula_type in ['roe', 'roa', 'asset_turnover', 'employee_efficiency']:
+                    suffix = "_single" if not use_averages else ""
+                    names.add(f"{formula_type}{suffix}_{year}")
+                else:
+                    names.add(f"{formula_type}_{year}")
     
     return names
 
