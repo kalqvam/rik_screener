@@ -135,14 +135,18 @@ def _get_customized_standard_formulas(standard_config: Dict[str, Any], years: li
             for year in config_val.get('years', []):
                 if formula_type == 'ebitda_margin':
                     formulas[f"ebitda_margin_{year}"] = ebitda_margin(year)
-                elif formula_type in ['roe', 'roe_single']:
-                    formulas[f"roe_{year}"] = roe(year, binary)
-                elif formula_type in ['roa', 'roa_single']:
-                    formulas[f"roa_{year}"] = roa(year, binary)
-                elif formula_type in ['asset_turnover', 'asset_turnover_single']:
-                    formulas[f"asset_turnover_{year}"] = asset_turnover(year, binary)
-                elif formula_type in ['employee_efficiency', 'employee_efficiency_single']:
-                    formulas[f"employee_efficiency_{year}"] = employee_efficiency(year, binary)
+                elif formula_type == 'roe':
+                    suffix = "_single" if not use_averages else ""
+                    formulas[f"roe{suffix}_{year}"] = roe(year, binary)
+                elif formula_type == 'roa':
+                    suffix = "_single" if not use_averages else ""
+                    formulas[f"roa{suffix}_{year}"] = roa(year, binary)
+                elif formula_type == 'asset_turnover':
+                    suffix = "_single" if not use_averages else ""
+                    formulas[f"asset_turnover{suffix}_{year}"] = asset_turnover(year, binary)
+                elif formula_type == 'employee_efficiency':
+                    suffix = "_single" if not use_averages else ""
+                    formulas[f"employee_efficiency{suffix}_{year}"] = employee_efficiency(year, binary)
                 elif formula_type == 'cash_ratio':
                     formulas[f"cash_ratio_{year}"] = cash_ratio(year)
                 elif formula_type == 'current_ratio':
