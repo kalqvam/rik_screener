@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Optional
+from typing import Optional, Union
 
 from ..utils import (
     get_config,
@@ -12,16 +12,22 @@ from ..utils import (
 
 
 def add_company_names(
-    input_file: str = "ranked_companies.csv",
-    output_file: str = "final_companies_with_names.csv",
-    legal_data_file: str = "legal_data.csv"
-) -> pd.DataFrame:
-    log_info(f"Loading ranked companies from {input_file}")
+    input_file: Optional[str] = "ranked_companies.csv",
+    input_data: Optional[pd.DataFrame] = None,
+    output_file: Optional[str] = "final_companies_with_names.csv",
+    legal_data_file: str = "legal_data.csv",
+    return_dataframe: bool = False
+) -> Union[pd.DataFrame, None]:
     
-    companies_df = safe_read_csv(input_file)
-    if companies_df is None:
-        log_error(f"Failed to load input file {input_file}")
-        return None
+    if input_data is not None:
+        log_info(f"Using provided DataFrame with {len(input_data)} companies")
+        companies_df = input_data.copy()
+    else:
+        log_info(f"Loading ranked companies from {input_file}")
+        companies_df = safe_read_csv(input_file)
+        if companies_df is None:
+            log_error(f"Failed to load input file {input_file}")
+            return None
     
     log_info(f"Loaded {len(companies_df)} companies")
     
@@ -67,9 +73,10 @@ def add_company_names(
         cols.insert(0, 'company_name')
         companies_df = companies_df[cols]
     
-    if safe_write_csv(companies_df, output_file, encoding='utf-8-sig'):
-        log_info(f"Saved {len(companies_df)} companies with names to {output_file}")
-    else:
-        log_error(f"Failed to save results to {output_file}")
+    if output_file and not return_dataframe:
+        if safe_write_csv(companies_df, output_file, encoding='utf-8-sig'):
+            log_info(f"Saved {len(companies_df)} companies with names to {output_file}")
+        else:
+            log_error(f"Failed to save results to {output_file}")
     
     return companies_df

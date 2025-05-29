@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import json
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 
 from ..utils import (
     get_config,
@@ -17,19 +17,25 @@ from ..utils import (
 
 
 def add_ownership_data(
-    input_file: str = "companies_with_industry.csv",
-    output_file: str = "companies_with_ownership.csv",
+    input_file: Optional[str] = "companies_with_industry.csv",
+    input_data: Optional[pd.DataFrame] = None,
+    output_file: Optional[str] = "companies_with_ownership.csv",
     shareholders_file: str = "shareholders.json",
     top_percentages: int = 3,
     top_names: int = 3,
-    filters: dict = None
-) -> pd.DataFrame:
-    log_info(f"Loading companies from {input_file}")
-
-    companies_df = safe_read_csv(input_file)
-    if companies_df is None:
-        log_error(f"Failed to load input file {input_file}")
-        return None
+    filters: dict = None,
+    return_dataframe: bool = False
+) -> Union[pd.DataFrame, None]:
+    
+    if input_data is not None:
+        log_info(f"Using provided DataFrame with {len(input_data)} companies")
+        companies_df = input_data.copy()
+    else:
+        log_info(f"Loading companies from {input_file}")
+        companies_df = safe_read_csv(input_file)
+        if companies_df is None:
+            log_error(f"Failed to load input file {input_file}")
+            return None
 
     log_info(f"Loaded {len(companies_df)} companies")
 
@@ -190,10 +196,11 @@ def add_ownership_data(
                 except (json.JSONDecodeError, TypeError):
                     companies_df.at[idx, f'top_{top_names}_owners'] = 'Error'
 
-        if safe_write_csv(companies_df, output_file):
-            log_info(f"Saved {len(companies_df)} companies with ownership data to {output_file}")
-        else:
-            log_error(f"Failed to save results to {output_file}")
+        if output_file and not return_dataframe:
+            if safe_write_csv(companies_df, output_file):
+                log_info(f"Saved {len(companies_df)} companies with ownership data to {output_file}")
+            else:
+                log_error(f"Failed to save results to {output_file}")
 
         return companies_df
 

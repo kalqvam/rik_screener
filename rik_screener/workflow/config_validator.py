@@ -9,6 +9,7 @@ def validate_config(config: Dict[str, Any]) -> None:
     _validate_years(config.get('years'))
     _validate_legal_forms(config.get('legal_forms'))
     _validate_skip_steps(config.get('skip_steps'))
+    _validate_pipeline_mode(config.get('use_dataframe_pipeline'))
     _validate_formulas(config)
     _validate_scoring_config(config.get('scoring_config'))
     _validate_financial_filters(config.get('financial_filters'))
@@ -41,6 +42,12 @@ def _validate_skip_steps(skip_steps):
         invalid_steps = [step for step in skip_steps if step not in valid_steps]
         if invalid_steps:
             raise ValueError(f"Invalid skip steps: {invalid_steps}. Valid options: {valid_steps}")
+
+
+def _validate_pipeline_mode(use_dataframe_pipeline):
+    if use_dataframe_pipeline is not None:
+        if not isinstance(use_dataframe_pipeline, bool):
+            raise ValueError("use_dataframe_pipeline must be a boolean")
 
 
 def _validate_formulas(config):

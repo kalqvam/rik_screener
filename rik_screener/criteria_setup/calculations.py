@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from ..utils import (
     get_config,
@@ -22,13 +22,15 @@ from .calculation_utils import (
 
 
 def calculate_ratios(
-    input_file: str = "merged_companies_multi_year.csv",
-    output_file: str = "companies_with_ratios.csv",
+    input_file: Optional[str] = "merged_companies_multi_year.csv",
+    input_data: Optional[pd.DataFrame] = None,
+    output_file: Optional[str] = "companies_with_ratios.csv",
     years: List[int] = None,
     financial_items: List[str] = None,
     formulas: Dict[str, str] = None,
-    use_standard_formulas: bool = True
-) -> pd.DataFrame:
+    use_standard_formulas: bool = True,
+    return_dataframe: bool = False
+) -> Union[pd.DataFrame, None]:
     config = get_config()
     
     if years is None:
@@ -64,11 +66,15 @@ def calculate_ratios(
     
     log_info(f"Financial items to retrieve: {financial_items}")
     
-    log_info(f"Loading merged companies from {input_file}")
-    result = safe_read_csv(input_file)
-    if result is None:
-        log_error(f"Failed to load input file {input_file}")
-        return None
+    if input_data is not None:
+        log_info(f"Using provided DataFrame with {len(input_data)} companies")
+        result = input_data.copy()
+    else:
+        log_info(f"Loading merged companies from {input_file}")
+        result = safe_read_csv(input_file)
+        if result is None:
+            log_error(f"Failed to load input file {input_file}")
+            return None
     
     log_info(f"Loaded {len(result)} companies from merged data")
     log_info(f"Columns in merged data: {sorted(result.columns.tolist())}")
@@ -83,10 +89,11 @@ def calculate_ratios(
 
     result = flag_investment_vehicles(result, years, valid_formulas)
     
-    if safe_write_csv(result, output_file):
-        log_info(f"Saved {len(result)} companies with ratios to {output_file}")
-    else:
-        log_error(f"Failed to save results to {output_file}")
+    if output_file and not return_dataframe:
+        if safe_write_csv(result, output_file):
+            log_info(f"Saved {len(result)} companies with ratios to {output_file}")
+        else:
+            log_error(f"Failed to save results to {output_file}")
     
     return result
 

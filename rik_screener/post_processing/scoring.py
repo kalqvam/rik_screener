@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union
 
 from ..utils import (
     safe_read_csv,
@@ -14,17 +14,23 @@ from .scoring_config import validate_scoring_config
 
 
 def score_companies(
-    input_file: str = "companies_with_ownership.csv",
-    output_file: str = "companies_with_scores.csv",
+    input_file: Optional[str] = "companies_with_ownership.csv",
+    input_data: Optional[pd.DataFrame] = None,
+    output_file: Optional[str] = "companies_with_scores.csv",
     scoring_config: Dict[str, Dict[str, Any]] = None,
-    score_column: str = "score"
-) -> pd.DataFrame:
-    log_info(f"Loading companies data from {input_file}")
+    score_column: str = "score",
+    return_dataframe: bool = False
+) -> Union[pd.DataFrame, None]:
     
-    companies_df = safe_read_csv(input_file)
-    if companies_df is None:
-        log_error(f"Failed to load input file {input_file}")
-        return None
+    if input_data is not None:
+        log_info(f"Using provided DataFrame with {len(input_data)} companies")
+        companies_df = input_data.copy()
+    else:
+        log_info(f"Loading companies data from {input_file}")
+        companies_df = safe_read_csv(input_file)
+        if companies_df is None:
+            log_error(f"Failed to load input file {input_file}")
+            return None
     
     log_info(f"Loaded {len(companies_df)} companies")
     
@@ -76,10 +82,11 @@ def score_companies(
     
     _log_scoring_summary(scoring_stats, companies_df[score_column])
     
-    if safe_write_csv(companies_df, output_file):
-        log_info(f"Saved {len(companies_df)} companies with scores to {output_file}")
-    else:
-        log_error(f"Failed to save results to {output_file}")
+    if output_file and not return_dataframe:
+        if safe_write_csv(companies_df, output_file):
+            log_info(f"Saved {len(companies_df)} companies with scores to {output_file}")
+        else:
+            log_error(f"Failed to save results to {output_file}")
     
     return companies_df
 

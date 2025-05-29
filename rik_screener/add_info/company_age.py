@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 
 from ..utils import (
     get_config,
@@ -14,28 +14,32 @@ from ..utils import (
 
 
 def add_company_age(
-    input_file: str = "companies_with_industry.csv",
-    output_file: str = "companies_with_age.csv",
-    legal_data_file: str = "legal_data.csv"
-) -> pd.DataFrame:
-    log_info(f"Loading companies from {input_file}")
+    input_file: Optional[str] = "companies_with_industry.csv",
+    input_data: Optional[pd.DataFrame] = None,
+    output_file: Optional[str] = "companies_with_age.csv",
+    legal_data_file: str = "legal_data.csv",
+    return_dataframe: bool = False
+) -> Union[pd.DataFrame, None]:
     
-    companies_df = safe_read_csv(input_file)
-    if companies_df is None:
-        log_error(f"Failed to load input file {input_file}")
-        return None
+    if input_data is not None:
+        log_info(f"Using provided DataFrame with {len(input_data)} companies")
+        companies_df = input_data.copy()
+    else:
+        log_info(f"Loading companies from {input_file}")
+        companies_df = safe_read_csv(input_file)
+        if companies_df is None:
+            log_error(f"Failed to load input file {input_file}")
+            return None
     
     log_info(f"Loaded {len(companies_df)} companies")
     
     log_info(f"Loading legal data from {legal_data_file}")
     
-    # Read the full legal data file first (it uses semicolon separator)
     legal_df = safe_read_csv(legal_data_file, separator=';')
     if legal_df is None:
         log_error(f"Failed to load legal data file {legal_data_file}")
         return companies_df
     
-    # Then select only the columns we need
     if 'ariregistri_kood' not in legal_df.columns or 'ettevotja_esmakande_kpv' not in legal_df.columns:
         log_error(f"Required columns not found in {legal_data_file}")
         log_error(f"Available columns: {legal_df.columns.tolist()}")
@@ -71,9 +75,10 @@ def add_company_age(
     if matched_count == 0:
         log_warning("No companies were matched with legal data")
     
-    if safe_write_csv(companies_df, output_file):
-        log_info(f"Saved {len(companies_df)} companies with age data to {output_file}")
-    else:
-        log_error(f"Failed to save results to {output_file}")
+    if output_file and not return_dataframe:
+        if safe_write_csv(companies_df, output_file):
+            log_info(f"Saved {len(companies_df)} companies with age data to {output_file}")
+        else:
+            log_error(f"Failed to save results to {output_file}")
     
     return companies_df

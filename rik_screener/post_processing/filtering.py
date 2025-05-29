@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 
 from ..utils import (
     get_config,
@@ -15,20 +15,26 @@ from ..utils import (
 
 
 def filter_and_rank(
-    input_file: str = "companies_with_ratios.csv",
-    output_file: str = "ranked_companies.csv",
+    input_file: Optional[str] = "companies_with_ratios.csv",
+    input_data: Optional[pd.DataFrame] = None,
+    output_file: Optional[str] = "ranked_companies.csv",
     sort_column: str = "EBITDA_Margin",
     filters: list = None,
     ascending: bool = False,
     top_n: int = None,
-    export_columns: list = None
-) -> pd.DataFrame:
-    log_info(f"Loading companies with ratios from {input_file}")
+    export_columns: list = None,
+    return_dataframe: bool = False
+) -> Union[pd.DataFrame, None]:
     
-    companies_df = safe_read_csv(input_file)
-    if companies_df is None:
-        log_error(f"Failed to load input file {input_file}")
-        return None
+    if input_data is not None:
+        log_info(f"Using provided DataFrame with {len(input_data)} companies")
+        companies_df = input_data.copy()
+    else:
+        log_info(f"Loading companies with ratios from {input_file}")
+        companies_df = safe_read_csv(input_file)
+        if companies_df is None:
+            log_error(f"Failed to load input file {input_file}")
+            return None
 
     original_count = len(companies_df)
     log_info(f"Loaded {original_count} companies")
@@ -90,9 +96,10 @@ def filter_and_rank(
         companies_df = companies_df[export_columns]
         log_info(f"Selected {len(export_columns)} columns for export")
 
-    if safe_write_csv(companies_df, output_file, encoding='utf-8-sig'):
-        log_info(f"Saved {len(companies_df)} ranked companies to {output_file}")
-    else:
-        log_error(f"Failed to save results to {output_file}")
+    if output_file and not return_dataframe:
+        if safe_write_csv(companies_df, output_file, encoding='utf-8-sig'):
+            log_info(f"Saved {len(companies_df)} ranked companies to {output_file}")
+        else:
+            log_error(f"Failed to save results to {output_file}")
 
     return companies_df
