@@ -6,7 +6,7 @@ import re
 from typing import List, Dict, Optional
 from datetime import datetime
 
-DEFAULT_BASE_PATH = "/content/drive/MyDrive/Python/rik_screener"
+DEFAULT_BASE_PATH = "/content/drive/MyDrive/YOUR_FOLDER"
 BASE_PATH = os.getenv('RIK_SCREENER_PATH', DEFAULT_BASE_PATH)
 
 from .df_prep.general_filter import filter_companies
