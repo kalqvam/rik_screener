@@ -19,8 +19,9 @@ from .add_info.emtak_descriptions import add_emtak_descriptions, get_industry_su
 from .post_processing.filtering import filter_and_rank
 from .add_info.company_age import add_company_age
 from .post_processing.company_names import add_company_names
+from .workflow import run_company_screening, validate_config
 
-__version__ = "1.0.0"
+__version__ = "2.3.0"
 __author__ = "kalqvam"
 
 __all__ = [
@@ -36,6 +37,8 @@ __all__ = [
     'filter_and_rank',
     'add_company_age',
     'add_company_names',
+    'run_company_screening',
+    'validate_config',
     'BASE_PATH',
     'setup_environment',
     'get_timestamp',
@@ -90,3 +93,4 @@ def validate_base_path():
 print(f"RIK Screener v{__version__} initialized")
 print(f"Base path: {BASE_PATH}")
 print("Use set_base_path() to change the data directory if needed")
+print("New: Use run_company_screening() for streamlined workflow with config-based control")
