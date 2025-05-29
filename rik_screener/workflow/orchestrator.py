@@ -35,7 +35,7 @@ def run_company_screening(config: Dict[str, Any] = None, **kwargs) -> pd.DataFra
     
     if final_config.get('save_final_output', True):
         from ..utils import safe_write_csv
-        safe_write_csv(result_df, output_file, encoding='utf-8')
+        safe_write_csv(result_df, output_file, encoding='utf-8-sig')
         log_info(f"Final results saved to {output_file}")
     
     if final_config.get('cleanup_intermediates', True) and not use_dataframe_pipeline:
