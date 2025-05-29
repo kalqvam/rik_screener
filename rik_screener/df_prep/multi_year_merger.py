@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import List
+from typing import List, Union, Optional
 
 from ..utils import (
     get_config,
@@ -14,10 +14,11 @@ from ..utils import (
 def merge_multiple_years(
     years: List[int],
     legal_forms: List[str] = ["AS", "OÜ"],
-    output_file: str = "merged_companies_multiyear.csv",
+    output_file: Optional[str] = "merged_companies_multiyear.csv",
     require_all_years: bool = True,
-    filter_companies_func=None
-) -> pd.DataFrame:
+    filter_companies_func=None,
+    return_dataframe: bool = False
+) -> Union[pd.DataFrame, None]:
 
     if filter_companies_func is None:
         from .general_filter import filter_companies
@@ -33,11 +34,20 @@ def merge_multiple_years(
 
     for year in years:
         log_info(f"Processing year {year}")
-        year_df = filter_companies_func(
-            year=year,
-            legal_forms=legal_forms,
-            output_file=f"temp_filtered_companies_{year}.csv"
-        )
+        
+        if return_dataframe:
+            year_df = filter_companies_func(
+                year=year,
+                legal_forms=legal_forms,
+                output_file=None,
+                return_dataframe=True
+            )
+        else:
+            year_df = filter_companies_func(
+                year=year,
+                legal_forms=legal_forms,
+                output_file=f"temp_filtered_companies_{year}.csv"
+            )
 
         if year_df is None or year_df.empty:
             log_warning(f"No data available for year {year}")
@@ -95,11 +105,15 @@ def merge_multiple_years(
                 merged_data = merged_data.drop(columns=dup_cols)
 
     if not merged_data.empty:
-        if safe_write_csv(merged_data, output_file):
-            log_info(f"Saved {len(merged_data)} companies with multi-year data to {output_file}")
+        if output_file and not return_dataframe:
+            if safe_write_csv(merged_data, output_file):
+                log_info(f"Saved {len(merged_data)} companies with multi-year data to {output_file}")
+            else:
+                log_error(f"Failed to save merged data to {output_file}")
         else:
-            log_error(f"Failed to save merged data to {output_file}")
+            log_info(f"Created merged dataset with {len(merged_data)} companies")
 
-    cleanup_temp_files(pattern="temp_filtered_companies_*.csv")
+    if not return_dataframe:
+        cleanup_temp_files(pattern="temp_filtered_companies_*.csv")
 
     return merged_data
