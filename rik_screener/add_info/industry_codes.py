@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Optional, Union
 
 from ..utils import (
     get_config,
@@ -14,17 +14,23 @@ from ..utils import (
 
 
 def add_industry_classifications(
-    input_file: str = "companies_with_ratios.csv",
-    output_file: str = "companies_with_industry.csv",
+    input_file: Optional[str] = "companies_with_ratios.csv",
+    input_data: Optional[pd.DataFrame] = None,
+    output_file: Optional[str] = "companies_with_industry.csv",
     revenues_file: str = "revenues.csv",
-    years: list = None
-) -> pd.DataFrame:
-    log_info(f"Loading companies from {input_file}")
-
-    companies_df = safe_read_csv(input_file)
-    if companies_df is None:
-        log_error(f"Failed to load input file {input_file}")
-        return None
+    years: list = None,
+    return_dataframe: bool = False
+) -> Union[pd.DataFrame, None]:
+    
+    if input_data is not None:
+        log_info(f"Using provided DataFrame with {len(input_data)} companies")
+        companies_df = input_data.copy()
+    else:
+        log_info(f"Loading companies from {input_file}")
+        companies_df = safe_read_csv(input_file)
+        if companies_df is None:
+            log_error(f"Failed to load input file {input_file}")
+            return None
 
     log_info(f"Loaded {len(companies_df)} companies")
 
@@ -118,10 +124,11 @@ def add_industry_classifications(
         traceback.print_exc()
         return companies_df
 
-    if safe_write_csv(companies_df, output_file):
-        log_info(f"Saved {len(companies_df)} companies with industry codes to {output_file}")
-    else:
-        log_error(f"Failed to save results to {output_file}")
+    if output_file and not return_dataframe:
+        if safe_write_csv(companies_df, output_file):
+            log_info(f"Saved {len(companies_df)} companies with industry codes to {output_file}")
+        else:
+            log_error(f"Failed to save results to {output_file}")
 
     for year in years:
         industry_col = f"industry_code_{year}"
