@@ -106,12 +106,15 @@ Place these CSV files in your data directory:
 
 ### Standard Formulas Available
 - `ebitda_margin` - EBITDA margin calculation
-- `roe` / `roa` - Return on equity/assets (with averaging options)
-- `asset_turnover` - Asset efficiency ratios
-- `current_ratio` - Liquidity ratios
-- `debt_to_equity` - Leverage ratios
-- `revenue_growth` - Growth calculations
-- `revenue_cagr` - Compound annual growth rate
+- `roe` / `roa` - Return on equity/assets (with option of divisor as average or same year value)
+- `asset_turnover` - Asset efficiency ratios (with option of divisor as average or same year value)
+- `cash_ratio` - Cash and equivalents / Current Liabilities
+- `current_ratio` - Current ratio: Current Assets / Current Liabilities
+- `debt_to_equity` - D/E, where Debt is Total Liabilities
+- `revenue_growth` - Revenue growth between two given years
+- `revenue_cagr` - Revenue compound annual growth rate
+- `employee_efficiency` - Revenue / Average Full-Time Employees
+- `labour_ratio` - Wages / Total Revenue
 
 ### Custom Formulas
 ```python
