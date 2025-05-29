@@ -42,13 +42,9 @@ def safe_read_csv(
     if encoding is None:
         encoding = config.get_default('encoding', 'utf-8')
     
-    # Auto-detect separator based on file type if not explicitly provided
     if separator is None:
-        # Original input files use semicolon
         if any(name in filename for name in ['general_data.csv', 'revenues.csv', 'financials_']):
             separator = ';'
-        # Generated files use pandas default (comma)
-        # Don't set separator, let pandas auto-detect
     
     try:
         log_info(f"Reading CSV file: {filename}")
@@ -58,7 +54,6 @@ def safe_read_csv(
             **kwargs
         }
         
-        # Only set separator if we determined one
         if separator is not None:
             read_kwargs['sep'] = separator
         
@@ -113,9 +108,8 @@ def safe_write_csv(
 
 
 def cleanup_temp_files(
-    pattern: str = "temp_*.csv",
-    base_path: Optional[str] = None,
-    max_age_hours: Optional[int] = 24
+    pattern: str = "*temp_*.csv",
+    base_path: Optional[str] = None
 ) -> int:
     if base_path is None:
         base_path = get_config().base_path
@@ -127,12 +121,6 @@ def cleanup_temp_files(
     
     for file_path in temp_files:
         try:
-            if max_age_hours is not None:
-                import time
-                file_age_hours = (time.time() - os.path.getmtime(file_path)) / 3600
-                if file_age_hours < max_age_hours:
-                    continue
-            
             os.remove(file_path)
             deleted_count += 1
             log_info(f"Deleted temporary file: {os.path.basename(file_path)}")

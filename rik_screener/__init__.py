@@ -21,7 +21,7 @@ from .add_info.company_age import add_company_age
 from .post_processing.company_names import add_company_names
 from .workflow import run_company_screening, validate_config
 
-__version__ = "2.3.1"
+__version__ = "3.1.3"
 __author__ = "kalqvam"
 
 __all__ = [
