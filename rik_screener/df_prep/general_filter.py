@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import List
+from typing import List, Optional, Union
 
 from ..utils import (
     get_config,
@@ -14,8 +14,9 @@ from ..utils import (
 def filter_companies(
     year: int = 2023,
     legal_forms: list = ["AS", "OÜ"],
-    output_file: str = "filtered_companies.csv"
-) -> pd.DataFrame:
+    output_file: Optional[str] = "filtered_companies.csv",
+    return_dataframe: bool = False
+) -> Union[pd.DataFrame, None]:
     log_info(f"Reading general company data for {year}")
 
     config = get_config()
@@ -66,9 +67,10 @@ def filter_companies(
 
     filtered_companies = filtered_companies.drop(columns=["staatus"])
 
-    if safe_write_csv(filtered_companies, output_file):
-        log_info(f"Saved {len(filtered_companies)} filtered companies to {output_file}")
-    else:
-        log_error(f"Failed to save filtered companies to {output_file}")
+    if output_file and not return_dataframe:
+        if safe_write_csv(filtered_companies, output_file):
+            log_info(f"Saved {len(filtered_companies)} filtered companies to {output_file}")
+        else:
+            log_error(f"Failed to save filtered companies to {output_file}")
 
     return filtered_companies
