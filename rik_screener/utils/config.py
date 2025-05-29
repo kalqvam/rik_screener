@@ -14,7 +14,7 @@ class ConfigManager:
         if env_path:
             return env_path
 
-        return "/content/drive/MyDrive/Python/rik_screener"
+        return "/content/drive/MyDrive/YOUR_FOLDER"
     
     def _load_defaults(self) -> Dict[str, Any]:
         return {
