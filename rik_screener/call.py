@@ -21,11 +21,13 @@ from .df_prep.multi_year_merger import merge_multiple_years
 from .criteria_setup.calculations import calculate_ratios
 from .criteria_setup.calculation_utils import get_standard_formulas
 from .add_info.industry_codes import add_industry_classifications
+from .add_info.company_age import add_company_age
 from .add_info.emtak_descriptions import add_emtak_descriptions
 from .add_info.shareholder_data import add_ownership_data
 from .post_processing.filtering import filter_and_rank
 from .post_processing.scoring import score_companies
 from .post_processing.scoring_config import get_default_scoring_config
+from .post_processing.company_names import add_company_names
 
 try:
     from google.colab import drive
@@ -96,6 +98,21 @@ else:
     current_file = industry_file
     log_info(f"Columns in industry dataframe: {industry_df.columns.tolist()}")
 
+log_step("ADDING COMPANY AGE")
+age_file = f"companies_with_age_{years[-1]}_{years[0]}_{timestamp}.csv"
+
+age_df = add_company_age(
+    input_file=current_file,
+    output_file=age_file,
+    legal_data_file="legal_data.csv"
+)
+
+if age_df is None:
+    log_warning("Failed to add company age. Using previous file for next step")
+else:
+    current_file = age_file
+    log_info(f"Added company age successfully")
+
 log_step("ADDING EMTAK DESCRIPTIONS")
 emtak_file = f"companies_with_emtak_descriptions_{years[-1]}_{years[0]}_{timestamp}.csv"
 
@@ -157,6 +174,8 @@ if ownership_df is not None:
     available_columns = ownership_df.columns.tolist()
 elif emtak_df is not None:
     available_columns = emtak_df.columns.tolist()
+elif age_df is not None:
+    available_columns = age_df.columns.tolist()
 elif industry_df is not None:
     available_columns = industry_df.columns.tolist()
 else:
@@ -236,8 +255,27 @@ if ranked_df is None or ranked_df.empty:
     log_error("Failed to rank companies. Exiting")
     sys.exit()
 
-log_info("Top 10 companies after all filtering and ranking:")
-log_info(str(ranked_df.head(10)))
+log_step("ADDING COMPANY NAMES TO FINAL RESULTS")
+final_file = f"final_companies_with_names_{years[-1]}_{years[0]}_{timestamp}.csv"
 
-log_info(f"Full results saved to: {config.get_file_path(ranked_file)}")
+final_df = add_company_names(
+    input_file=ranked_file,
+    output_file=final_file,
+    legal_data_file="legal_data.csv"
+)
+
+if final_df is None:
+    log_warning("Failed to add company names. Using ranked file as final result")
+    final_output = ranked_file
+else:
+    final_output = final_file
+    log_info(f"Added company names successfully")
+
+log_info("Top 10 companies after all filtering and ranking:")
+if final_df is not None:
+    log_info(str(final_df.head(10)))
+else:
+    log_info(str(ranked_df.head(10)))
+
+log_info(f"Full results saved to: {config.get_file_path(final_output)}")
 log_info("Analysis complete!")
