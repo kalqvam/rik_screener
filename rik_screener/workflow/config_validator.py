@@ -65,10 +65,9 @@ def _validate_formulas(config):
 
 def _validate_standard_formulas(standard_formulas, years):
     valid_formula_types = [
-        'ebitda_margin', 'roe', 'roe_single', 'roa', 'roa_single', 
-        'asset_turnover', 'asset_turnover_single', 'employee_efficiency', 
-        'employee_efficiency_single', 'cash_ratio', 'current_ratio', 
-        'debt_to_equity', 'labour_ratio', 'revenue_growth', 'revenue_cagr'
+        'ebitda_margin', 'roe', 'roa', 'asset_turnover', 'employee_efficiency',
+        'cash_ratio', 'current_ratio', 'debt_to_equity', 'labour_ratio', 
+        'revenue_growth', 'revenue_cagr'
     ]
     
     for formula_type, config_val in standard_formulas.items():
