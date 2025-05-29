@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from ..utils import (
     get_config,
@@ -13,21 +13,27 @@ from ..utils import (
 
 
 def add_emtak_descriptions(
-    input_file: str = "companies_with_industry.csv",
-    output_file: str = "companies_with_emtak_descriptions.csv",
+    input_file: Optional[str] = "companies_with_industry.csv",
+    input_data: Optional[pd.DataFrame] = None,
+    output_file: Optional[str] = "companies_with_emtak_descriptions.csv",
     emtak_file: str = "emtak_2008.csv",
     years: List[int] = None,
-    create_combined_columns: bool = True
-) -> pd.DataFrame:
+    create_combined_columns: bool = True,
+    return_dataframe: bool = False
+) -> Union[pd.DataFrame, None]:
     config = get_config()
     if years is None:
         years = config.get_years()
     
-    log_info(f"Loading company data from {input_file}")
-    companies_df = safe_read_csv(input_file)
-    if companies_df is None:
-        log_error(f"Failed to load input file {input_file}")
-        return None
+    if input_data is not None:
+        log_info(f"Using provided DataFrame with {len(input_data)} companies")
+        companies_df = input_data.copy()
+    else:
+        log_info(f"Loading company data from {input_file}")
+        companies_df = safe_read_csv(input_file)
+        if companies_df is None:
+            log_error(f"Failed to load input file {input_file}")
+            return None
     
     log_info(f"Loaded {len(companies_df)} companies")
     log_info(f"Available columns: {companies_df.columns.tolist()}")
@@ -125,11 +131,12 @@ def add_emtak_descriptions(
         mapping_rate = (total_mapped / (total_mapped + total_unmapped)) * 100
         log_info(f"Overall mapping rate: {mapping_rate:.1f}%")
     
-    if safe_write_csv(companies_df, output_file):
-        log_info(f"Saved {len(companies_df)} companies with EMTAK descriptions to {output_file}")
-    else:
-        log_error(f"Failed to save results to {output_file}")
-        return None
+    if output_file and not return_dataframe:
+        if safe_write_csv(companies_df, output_file):
+            log_info(f"Saved {len(companies_df)} companies with EMTAK descriptions to {output_file}")
+        else:
+            log_error(f"Failed to save results to {output_file}")
+            return None
     
     return companies_df
 
