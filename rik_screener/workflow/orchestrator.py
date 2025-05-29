@@ -2,7 +2,7 @@ import pandas as pd
 from typing import Dict, Any, Optional
 
 from .config_validator import validate_config
-from ..utils import get_config, log_step, log_info, log_warning, cleanup_temp_files
+from ..utils import get_config, log_step, log_info, log_warning, cleanup_temp_files, safe_read_csv
 from ..df_prep.multi_year_merger import merge_multiple_years
 from ..criteria_setup.calculations import calculate_ratios
 from ..criteria_setup.calculation_utils import get_standard_formulas
@@ -265,7 +265,6 @@ def _finalize_results(config: Dict[str, Any], input_file: str, output_file: str)
     )
     
     if final_df is None:
-        from ..utils import safe_read_csv
         final_df = safe_read_csv(input_file)
         if final_df is None:
             raise RuntimeError("Failed to load final results")
