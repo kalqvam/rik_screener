@@ -4,12 +4,12 @@ A Python package for screening and analyzing Estonian companies using RIK (Eston
 
 ## Overview
 
-RIK Screener processes Estonian company financial data to identify investment opportunities through automated screening, ratio calculations, and scoring. It combines financial metrics, industry classifications, ownership data, and company demographics into a comprehensive analysis pipeline.
+RIK Screener processes Estonian company registry and financial data of companies for various puposes. The screener includes automated screening, ratio calculations, and scoring. It combines financial metrics, industry classifications, ownership data, and company demographics into it's pipeline.
 
 ## Features
 
 - **Multi-year Financial Analysis**: Process and compare company data across multiple years
-- **Automated Ratio Calculations**: 15+ built-in financial ratios (EBITDA margin, ROE, ROA, debt ratios, etc.)
+- **Automated Ratio Calculations**: built-in financial ratios (EBITDA margin, ROE, ROA, debt ratios, etc.)
 - **Custom Formula Engine**: Create and apply custom financial formulas
 - **Company Scoring System**: Configurable scoring based on financial performance thresholds
 - **Industry Classification**: Automatic EMTAK code mapping and industry descriptions
@@ -92,7 +92,7 @@ final_results = filter_and_rank(
 ```
 
 ## Data Requirements
-Necessary files are available from official Estonian Business Registry: https://avaandmed.ariregister.rik.ee/et/avaandmete-allalaadimine
+Necessary files are available for downloading from an official Estonian Business Registry: https://avaandmed.ariregister.rik.ee/et/avaandmete-allalaadimine
 
 Place these CSV files in your data directory:
 - `general_data.csv` - Aruannete üldandmed
