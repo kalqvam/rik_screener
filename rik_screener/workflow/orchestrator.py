@@ -16,6 +16,8 @@ from ..post_processing.company_names import add_company_names
 
 
 def run_company_screening(config: Dict[str, Any] = None, **kwargs) -> pd.DataFrame:
+    reset_logger()
+    
     final_config = _merge_config_and_kwargs(config, kwargs)
     validate_config(final_config)
     
