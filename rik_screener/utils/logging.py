@@ -17,6 +17,9 @@ class ProgressLogger:
         self.enable_timestamps = enable_timestamps
         self.current_step = 0
     
+    def reset_step_counter(self):
+        self.current_step = 0
+    
     def _format_message(self, level: LogLevel, message: str) -> str:
         timestamp = datetime.now().strftime("%H:%M:%S") if self.enable_timestamps else ""
         
@@ -61,11 +64,17 @@ _logger_instance = None
 
 
 def get_logger() -> ProgressLogger:
-    """Get the global logger instance."""
     global _logger_instance
     if _logger_instance is None:
         _logger_instance = ProgressLogger()
     return _logger_instance
+
+
+def reset_logger():
+    global _logger_instance
+    if _logger_instance is not None:
+        _logger_instance.reset_step_counter()
+
 
 def log_info(message: str):
     get_logger().info(message)
