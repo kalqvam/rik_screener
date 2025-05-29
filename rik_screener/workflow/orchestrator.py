@@ -71,24 +71,72 @@ def _calculate_financial_ratios(config: Dict[str, Any], input_file: str) -> str:
     log_step("Calculating Financial Ratios")
     
     years = config['years']
-    temp_file = f"screening_temp_ratios_{years[-1]}_{years[0]}.csv"
+    temp_file_1 = f"screening_temp_standard_ratios_{years[-1]}_{years[0]}.csv"
+    temp_file_2 = f"screening_temp_all_ratios_{years[-1]}_{years[0]}.csv"
     
-    formulas = _build_formulas(config)
+    standard_formulas_config = config.get('standard_formulas', {})
+    custom_formulas = config.get('custom_formulas', {})
     financial_items = config.get('financial_items', get_config().get_default('financial_items'))
     
-    ratios_df = calculate_ratios(
-        input_file=input_file,
-        output_file=temp_file,
-        years=years,
-        formulas=formulas,
-        financial_items=financial_items,
-        use_standard_formulas=False
-    )
+    current_file = input_file
     
-    if ratios_df is None or ratios_df.empty:
-        raise RuntimeError("Failed to calculate financial ratios")
+    # Step 1: Calculate standard formulas if any
+    if standard_formulas_config:
+        log_info("Calculating standard formulas...")
+        standard_formulas = _get_customized_standard_formulas(standard_formulas_config, years)
+        
+        ratios_df = calculate_ratios(
+            input_file=current_file,
+            output_file=temp_file_1,
+            years=years,
+            formulas=standard_formulas,
+            financial_items=financial_items,
+            use_standard_formulas=False,
+            skip_financial_merge=False
+        )
+        
+        if ratios_df is None or ratios_df.empty:
+            raise RuntimeError("Failed to calculate standard formulas")
+        
+        current_file = temp_file_1
     
-    return temp_file
+    # Step 2: Calculate custom formulas if any
+    if custom_formulas:
+        log_info("Calculating custom formulas...")
+        ratios_df = calculate_ratios(
+            input_file=current_file,
+            output_file=temp_file_2,
+            years=years,
+            formulas=custom_formulas,
+            financial_items=financial_items,
+            use_standard_formulas=False,
+            skip_financial_merge=True  # Skip financial data merge, work with existing ratios
+        )
+        
+        if ratios_df is None or ratios_df.empty:
+            raise RuntimeError("Failed to calculate custom formulas")
+        
+        current_file = temp_file_2
+    
+    # If neither standard nor custom formulas, we still need the financial data merged
+    if not standard_formulas_config and not custom_formulas:
+        log_info("No formulas specified, merging financial data only...")
+        ratios_df = calculate_ratios(
+            input_file=current_file,
+            output_file=temp_file_1,
+            years=years,
+            formulas={},
+            financial_items=financial_items,
+            use_standard_formulas=False,
+            skip_financial_merge=False
+        )
+        
+        if ratios_df is None or ratios_df.empty:
+            raise RuntimeError("Failed to merge financial data")
+        
+        current_file = temp_file_1
+    
+    return current_file
 
 
 def _build_formulas(config: Dict[str, Any]) -> Dict[str, str]:
