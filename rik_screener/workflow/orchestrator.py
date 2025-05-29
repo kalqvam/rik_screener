@@ -2,7 +2,7 @@ import pandas as pd
 from typing import Dict, Any, Optional
 
 from .config_validator import validate_config
-from ..utils import get_config, log_step, log_info, log_warning, cleanup_temp_files, safe_read_csv
+from ..utils import get_config, log_step, log_info, log_warning, cleanup_temp_files, safe_read_csv, reset_logger
 from ..df_prep.multi_year_merger import merge_multiple_years
 from ..criteria_setup.calculations import calculate_ratios
 from ..criteria_setup.calculation_utils import get_standard_formulas
@@ -13,7 +13,6 @@ from ..add_info.shareholder_data import add_ownership_data
 from ..post_processing.scoring import score_companies
 from ..post_processing.filtering import filter_and_rank
 from ..post_processing.company_names import add_company_names
-
 
 def run_company_screening(config: Dict[str, Any] = None, **kwargs) -> pd.DataFrame:
     reset_logger()
