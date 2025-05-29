@@ -18,7 +18,8 @@ from .logging import (
     log_step,
     log_error,
     log_warning,
-    log_info
+    log_info,
+    reset_logger
 )
 
 __all__ = [
@@ -41,5 +42,6 @@ __all__ = [
     'log_step',
     'log_error',
     'log_warning',
-    'log_info'
+    'log_info',
+    'reset_logger'
 ]
