@@ -23,7 +23,6 @@ class SOAPClient:
             <prod:keha>
                 <prod:ariregister_kasutajanimi>{self.config.username}</prod:ariregister_kasutajanimi>
                 <prod:ariregister_parool>{self.config.password}</prod:ariregister_parool>
-                <prod:paringu_nimi>arireg.{operation}</prod:paringu_nimi>
                 {body_content}
             </prod:keha>
         </prod:{operation}>
