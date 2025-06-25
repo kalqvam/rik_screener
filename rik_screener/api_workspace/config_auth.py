@@ -7,7 +7,7 @@ class APIConfig:
         username: str,
         password: str,
         rate_limit: int = 20,
-        base_url: str = "https://ariregister.rik.ee/xtee6"
+        base_url: str = "https://ariregxmlv6.rik.ee/"
     ):
         self.username = username
         self.password = password
