@@ -33,12 +33,23 @@ class SOAPClient:
     def send_request(self, envelope: str) -> Optional[ET.Element]:
         self.config.wait_for_rate_limit()
         
+        print(f"SOAP Request URL: {self.config.base_url}")
+        print(f"SOAP Request Headers: {self.session.headers}")
+        print(f"SOAP Request Body:\n{envelope}")
+        print("-" * 50)
+        
         try:
             response = self.session.post(
                 self.config.base_url,
                 data=envelope.encode('utf-8'),
                 timeout=30
             )
+            
+            print(f"Response Status: {response.status_code}")
+            print(f"Response Headers: {dict(response.headers)}")
+            print(f"Response Content:\n{response.text[:1000]}...")
+            print("-" * 50)
+            
             response.raise_for_status()
             
             root = ET.fromstring(response.content)
