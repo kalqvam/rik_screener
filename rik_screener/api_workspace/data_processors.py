@@ -9,7 +9,7 @@ def parse_annual_reports_response(xml_response: ET.Element, company_code: str) -
             'soapenv': 'http://schemas.xmlsoap.org/soap/envelope/'
         }
         
-        aruanded = xml_response.findall('.//ns1:aruanne', ns)
+        aruanded = xml_response.findall('.//ns1:majandusaasta_aruanded', ns)
         
         if not aruanded:
             return None
@@ -38,7 +38,7 @@ def parse_company_info_response(xml_response: ET.Element, company_code: str) -> 
             'soapenv': 'http://schemas.xmlsoap.org/soap/envelope/'
         }
         
-        evnimi = xml_response.find('.//ns1:evnimi', ns)
+        evnimi = xml_response.find('.//ns1:ettevotjad/ns1:item/ns1:evnimi', ns)
         
         if evnimi is not None:
             return evnimi.text
