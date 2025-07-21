@@ -172,7 +172,7 @@ def _add_enrichment_data_df(config: Dict[str, Any], input_df: pd.DataFrame) -> p
         log_step("Adding EMTAK Descriptions")
         current_df = add_emtak_descriptions(
             input_data=current_df,
-            emtak_file="emtak_2008.csv",
+            emtak_file="emtak_2025.csv",
             years=years,
             create_combined_columns=True,
             return_dataframe=True
@@ -450,7 +450,7 @@ def _add_enrichment_data(config: Dict[str, Any], input_file: str, skip_steps: li
         result_df = add_emtak_descriptions(
             input_file=current_file,
             output_file=temp_file,
-            emtak_file="emtak_2008.csv",
+            emtak_file="emtak_2025.csv",
             years=years,
             create_combined_columns=True
         )
