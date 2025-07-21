@@ -16,7 +16,7 @@ def add_emtak_descriptions(
     input_file: Optional[str] = "companies_with_industry.csv",
     input_data: Optional[pd.DataFrame] = None,
     output_file: Optional[str] = "companies_with_emtak_descriptions.csv",
-    emtak_file: str = "emtak_2008.csv",
+    emtak_file: str = "emtak_2025.csv",
     years: List[int] = None,
     create_combined_columns: bool = True,
     return_dataframe: bool = False
